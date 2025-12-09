@@ -1,24 +1,19 @@
-FROM node:18 AS builder
+FROM node:18-slim
+
 WORKDIR /app
 
-# Copia tudo
-COPY . .
+# Backend
+COPY backend ./backend
 
-# Instala dependências
-RUN npm install --force
-RUN cd frontend && npm install --force && npm run build
+# Frontend (estático)
+COPY frontend ./frontend
 
-# Move build para dentro do backend
-RUN mkdir -p backend/frontend && cp -R frontend/dist/* backend/frontend/
+# Scripts adicionais (opcional)
+COPY scripts ./scripts
 
-FROM node:18-slim AS runner
-WORKDIR /app
-
-# Copia apenas backend + frontend já compilado
-COPY --from=builder /app/backend ./backend
-
-# Instala apenas dependências do backend
-RUN npm install --production --prefix backend --force
+RUN cd backend && npm install --production
 
 EXPOSE 3000
+
 CMD ["node", "backend/server.js"]
+

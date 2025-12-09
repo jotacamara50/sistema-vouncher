@@ -24,7 +24,7 @@ services:
     depends_on:
       - nginx-proxy
     environment:
-      - DEFAULT_EMAIL=seu-email@dominio.com
+      - DEFAULT_EMAIL=contato@esperancanamesailheus.com
       - NGINX_PROXY_CONTAINER=nginx-proxy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -42,14 +42,13 @@ services:
     expose:
       - "3000"
     environment:
-      - NODE_ENV=production
-      - VIRTUAL_HOST=esperancanamesailheus.com
-      - LETSENCRYPT_HOST=esperancanamesailheus.com
-      - LETSENCRYPT_EMAIL=seu-email@dominio.com
+      NODE_ENV: production
+      VIRTUAL_HOST: esperancanamesailheus.com,www.esperancanamesailheus.com
+      LETSENCRYPT_HOST: esperancanamesailheus.com,www.esperancanamesailheus.com
+      LETSENCRYPT_EMAIL: contato@esperancanamesailheus.com
     volumes:
       - ./backend/database.sqlite:/app/backend/database.sqlite
       - ./pdfs:/app/backend/pdfs
-      - ./uploads:/app/backend/uploads
     networks:
       - web
 
