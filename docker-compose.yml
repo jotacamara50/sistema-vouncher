@@ -3,19 +3,19 @@ version: "3.8"
 services:
 
   nginx-proxy:
-  image: jwilder/nginx-proxy:latest
-  container_name: nginx-proxy
-  restart: always
-  ports:
-    - "80:80"
-    - "443:443"
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock:ro
-    - nginx_certs:/etc/nginx/certs
-    - nginx_vhost:/etc/nginx/vhost.d
-    - nginx_html:/usr/share/nginx/html
-  networks:
-    - web
+    image: jwilder/nginx-proxy:latest
+    container_name: nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - nginx_certs:/etc/nginx/certs
+      - nginx_vhost:/etc/nginx/vhost.d
+      - nginx_html:/usr/share/nginx/html
+    networks:
+      - web
 
   acme-companion:
     image: nginxproxy/acme-companion
@@ -40,7 +40,7 @@ services:
     container_name: sistema-voucher
     restart: always
     expose:
-      - "3000"                   # Porta interna da aplicação
+      - "3000"
     environment:
       NODE_ENV: production
     labels:
