@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy:latest
+    container_name: nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - nginx_certs:/etc/nginx/certs
+      - nginx_vhost:/etc/nginx/vhost.d
+      - nginx_html:/usr/share/nginx/html
+    networks:
+      - web
+
+  acme-companion:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    restart: always
+    depends_on:
+      - nginx-proxy
+    environment:
+      - DEFAULT_EMAIL=seu-email@dominio.com
+      - NGINX_PROXY_CONTAINER=nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - nginx_certs:/etc/nginx/certs
+      - nginx_vhost:/etc/nginx/vhost.d
+      - nginx_html:/usr/share/nginx/html
+      - acme:/etc/acme.sh
+    networks:
+      - web
+
+  sistema-voucher:
+    build: .
+    container_name: sistema-voucher
+    restart: always
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - VIRTUAL_HOST=esperancanamesailheus.com
+      - LETSENCRYPT_HOST=esperancanamesailheus.com
+      - LETSENCRYPT_EMAIL=seu-email@dominio.com
+    volumes:
+      - ./backend/database.sqlite:/app/backend/database.sqlite
+      - ./pdfs:/app/backend/pdfs
+      - ./uploads:/app/backend/uploads
+    networks:
+      - web
+
+networks:
+  web:
+    driver: bridge
+
+volumes:
+  nginx_certs:
+  nginx_vhost:
+  nginx_html:
+  acme:

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscar Família - Sistema de Vouchers</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="user-info">
+      <span>👤 <span id="userName"></span></span>
+      <button class="btn-logout" onclick="logout()">Sair</button>
+    </div>
+
+    <div class="header">
+      <img src="logo.png" alt="Logo" class="logo-small">
+      <h1>Buscar Família</h1>
+      <p>Digite CPF, NIS ou Nome do beneficiário</p>
+    </div>
+
+    <div id="alert-container"></div>
+
+    <div class="search-box">
+      <input 
+        type="text" 
+        id="searchInput" 
+        placeholder="Digite para buscar..."
+        autocomplete="off"
+      >
+      <button onclick="buscarFamilia()">Buscar</button>
+    </div>
+
+    <div id="results" class="results-list"></div>
+  </div>
+
+  <script src="js/busca.js"></script>
+</body>
+</html>

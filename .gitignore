@@ -1,0 +1,35 @@
+# Ignorar node_modules
+node_modules/
+
+# Ignorar banco de dados
+*.sqlite
+*.db
+
+# Ignorar uploads temporários
+uploads/
+
+# Ignorar PDFs gerados
+pdfs/
+
+# Ignorar logs
+*.log
+npm-debug.log*
+
+# Ignorar arquivos de ambiente
+.env
+.env.local
+
+# Ignorar arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar arquivos do editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignorar arquivos de build
+dist/
+build/
