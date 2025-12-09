@@ -1,13 +1,13 @@
 version: "3.8"
 
 services:
-
+  # ---------------------------------------
+  # NGINX PROXY
+  # ---------------------------------------
   nginx-proxy:
     image: jwilder/nginx-proxy:latest
     container_name: nginx-proxy
     restart: always
-    labels:
-      com.github.nginx-proxy.nginx-proxy.nginx: "true"
     ports:
       - "80:80"
       - "443:443"
@@ -19,28 +19,68 @@ services:
     networks:
       - web
 
-  sistema-voucher:
-    build: .
-    container_name: sistema-voucher
+  # ---------------------------------------
+  # ACME (LETSENCRYPT)
+  # ---------------------------------------
+  acme-companion:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
     restart: always
-    expose:
-      - "3000"
+    depends_on:
+      - nginx-proxy
     environment:
-      NODE_ENV: production
-    labels:
-      - "VIRTUAL_HOST=esperancanamesailheus.com,www.esperancanamesailheus.com"
-      - "VIRTUAL_PORT=3000"
+      DEFAULT_EMAIL: contato@esperancanamesailheus.com
+      NGINX_PROXY_CONTAINER: nginx-proxy
     volumes:
-      - ./backend/database.sqlite:/app/backend/database.sqlite
-      - ./pdfs:/app/backend/pdfs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - nginx_certs:/etc/nginx/certs
+      - nginx_vhost:/etc/nginx/vhost.d
+      - nginx_html:/usr/share/nginx/html
+      - acme:/etc/acme.sh
     networks:
       - web
 
+  # ---------------------------------------
+  # APLICAÇÃO (SQLite + PDFs)
+  # Estrutura igual ao primeiro compose
+  # ---------------------------------------
+  app:
+    build:
+      context: .
+    container_name: sistema_voucher_app
+    restart: unless-stopped
+
+    environment:
+      NODE_ENV: production
+
+      # HOSTNAME + SSL PARA O PROXY AUTOMÁTICO
+      VIRTUAL_HOST: esperancanamesailheus.com,www.esperancanamesailheus.com
+      LETSENCRYPT_HOST: esperancanamesailheus.com,www.esperancanamesailheus.com
+      LETSENCRYPT_EMAIL: playbrasilpp@gmail.com
+      VIRTUAL_PORT: 3000   # << Porta interna da aplicação
+
+    expose:
+      - "3000"
+
+    volumes:
+      - sqlite-data:/app/backend/database.sqlite
+      - pdfs-data:/app/backend/pdfs
+
+    networks:
+      - web
+      - sistema_voucher_net
+
 networks:
   web:
+    driver: bridge
+
+  sistema_voucher_net:
     driver: bridge
 
 volumes:
   nginx_certs:
   nginx_vhost:
   nginx_html:
+  acme:
+  sqlite-data:
+  pdfs-data:
