@@ -37,8 +37,14 @@ try {
       // Extrair dados (suporta diferentes formatos de coluna)
       const codFamiliar = linha.COD_FAMILIAR || linha['COD FAMILIAR'] || linha.cod_familiar;
       const nome = linha.NOME || linha.nome;
-      const cpf = (linha.CPF || linha.cpf || '').toString().replace(/[.\-\s]/g, '');
-      const nis = (linha.NIS || linha.nis || '').toString().replace(/[.\-\s]/g, '');
+      
+      // CPF: remover formatação e completar com zeros à esquerda até 11 dígitos
+      let cpf = (linha.CPF || linha.cpf || '').toString().replace(/[.\-\s]/g, '');
+      cpf = cpf.padStart(11, '0');
+      
+      // NIS: remover formatação e completar com zeros à esquerda até 11 dígitos
+      let nis = (linha.NIS || linha.nis || '').toString().replace(/[.\-\s]/g, '');
+      nis = nis.padStart(11, '0');
       const endereco = linha.ENDERECO || linha.endereco || '';
       const bairro = linha.BAIRRO || linha.bairro || '';
       const telefone = (linha.TELEFONE1 || linha.TELEFONE || linha.telefone || '').toString();
