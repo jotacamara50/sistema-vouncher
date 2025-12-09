@@ -40,12 +40,14 @@ services:
     container_name: sistema-voucher
     restart: always
     expose:
-      - "3000"
+      - "3000"                   # Porta interna da aplicação
     environment:
       NODE_ENV: production
-      VIRTUAL_HOST: esperancanamesailheus.com,www.esperancanamesailheus.com
-      LETSENCRYPT_HOST: esperancanamesailheus.com,www.esperancanamesailheus.com
-      LETSENCRYPT_EMAIL: contato@esperancanamesailheus.com
+    labels:
+      - "VIRTUAL_HOST=esperancanamesailheus.com,www.esperancanamesailheus.com"
+      - "VIRTUAL_PORT=3000"
+      - "LETSENCRYPT_HOST=esperancanamesailheus.com,www.esperancanamesailheus.com"
+      - "LETSENCRYPT_EMAIL=contato@esperancanamesailheus.com"
     volumes:
       - ./backend/database.sqlite:/app/backend/database.sqlite
       - ./pdfs:/app/backend/pdfs
