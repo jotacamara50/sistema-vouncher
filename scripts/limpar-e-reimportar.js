@@ -60,28 +60,29 @@ function iniciarImportacao() {
     let familiasImportadas = 0;
     let membrosImportados = 0;
     let erros = 0;
+    let duplicadosIgnorados = 0;
     
     // Agrupar dados por código familiar
     const familias = {};
     
     dados.forEach((linha, index) => {
       const codFamiliar = linha.COD_FAMILIAR || linha['COD FAMILIAR'] || linha.cod_familiar;
-      const nome = linha.NOME || linha.nome;
+      const nome = (linha.NOME || linha.nome || '').toString().trim();
       
       // CPF e NIS com zeros à esquerda
-      let cpf = (linha.CPF || linha.cpf || '').toString().replace(/[.\-\s]/g, '');
+      let cpf = (linha.CPF || linha.cpf || '').toString().replace(/[.\-\s]/g, '').trim();
       cpf = cpf.padStart(11, '0');
       
-      let nis = (linha.NIS || linha.nis || '').toString().replace(/[.\-\s]/g, '');
+      let nis = (linha.NIS || linha.nis || '').toString().replace(/[.\-\s]/g, '').trim();
       nis = nis.padStart(11, '0');
       
       const endereco = linha.ENDERECO || linha.endereco || '';
       const bairro = linha.BAIRRO || linha.bairro || '';
       const telefone = (linha.TELEFONE1 || linha.TELEFONE || linha.telefone || '').toString();
       
-      // Validação
-      if (!codFamiliar || !nome || !cpf || !nis) {
-        console.log(`⚠️  Linha ${index + 2}: Dados obrigatórios faltando - IGNORADO`);
+      // Validação - ignorar linhas sem dados essenciais
+      if (!codFamiliar || !nome || !cpf || !nis || cpf === '00000000000' || nome.length < 3) {
+        console.log(`⚠️  Linha ${index + 2}: Dados obrigatórios faltando ou inválidos - IGNORADO`);
         erros++;
         return;
       }
@@ -92,12 +93,21 @@ function iniciarImportacao() {
           endereco,
           bairro,
           telefone,
-          membros: []
+          membros: [],
+          cpfsAdicionados: new Set() // Controle de duplicados
         };
+      }
+      
+      // Verificar se CPF já foi adicionado nesta família (evitar duplicados)
+      if (familias[codFamiliar].cpfsAdicionados.has(cpf)) {
+        console.log(`⚠️  Linha ${index + 2}: CPF ${cpf} duplicado na família ${codFamiliar} - IGNORADO`);
+        duplicadosIgnorados++;
+        return;
       }
       
       // Adicionar membro
       familias[codFamiliar].membros.push({ nome, cpf, nis });
+      familias[codFamiliar].cpfsAdicionados.add(cpf);
     });
 
     console.log(`👨‍👩‍👧‍👦 Total de famílias encontradas: ${Object.keys(familias).length}`);
@@ -169,7 +179,8 @@ function iniciarImportacao() {
       console.log('='.repeat(60));
       console.log(`👨‍👩‍👧‍👦 Famílias importadas: ${familiasImportadas}`);
       console.log(`👤 Membros importados: ${membrosImportados}`);
-      console.log(`❌ Erros: ${erros}`);
+      console.log(`🔄 Duplicados ignorados: ${duplicadosIgnorados}`);
+      console.log(`❌ Erros/Linhas inválidas: ${erros}`);
       console.log('='.repeat(60));
 
       db.close(() => {
