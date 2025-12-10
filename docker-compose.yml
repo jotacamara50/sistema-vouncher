@@ -45,6 +45,7 @@ services:
   # Estrutura igual ao primeiro compose
   # ---------------------------------------
   app:
+    image: sistema-vouncher-app
     build:
       context: .
     container_name: sistema_voucher_app
