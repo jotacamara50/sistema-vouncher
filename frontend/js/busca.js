@@ -22,8 +22,16 @@ if (usuario.tipo === 'fiscal') {
   }
 }
 
+// Permitir apenas números no campo de busca
+const searchInput = document.getElementById('searchInput');
+
+searchInput.addEventListener('input', (e) => {
+  // Remove qualquer caractere que não seja número
+  e.target.value = e.target.value.replace(/[^0-9]/g, '');
+});
+
 // Buscar ao pressionar Enter
-document.getElementById('searchInput').addEventListener('keypress', (e) => {
+searchInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     buscarFamilia();
   }
@@ -34,9 +42,25 @@ async function buscarFamilia() {
   const resultsDiv = document.getElementById('results');
 
   if (!termo) {
-    mostrarAlerta('Digite algo para buscar', 'error');
+    mostrarAlerta('Digite CPF ou NIS para buscar', 'error');
     return;
   }
+
+  // Validar se contém apenas números
+  if (!/^[0-9]+$/.test(termo)) {
+    mostrarAlerta('Digite apenas números (CPF ou NIS)', 'error');
+    return;
+  }
+
+  // Se tiver 11 dígitos, validar como CPF
+  if (termo.length === 11) {
+    // É um CPF, continuar normalmente
+  } else if (termo.length < 11) {
+    // Pode ser NIS ou CPF incompleto
+    mostrarAlerta('CPF deve ter 11 dígitos. Para NIS, digite o número completo.', 'error');
+    return;
+  }
+  // Se tiver mais de 11 dígitos, pode ser NIS (que tem 11 dígitos também, mas permite outros formatos)
 
   resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
 

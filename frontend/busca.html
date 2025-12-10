@@ -19,7 +19,7 @@
     <div class="header">
       <img src="../logo.PNG" alt="Logo" class="logo-small">
       <h1>Buscar Família</h1>
-      <p>Digite CPF, NIS ou Nome do beneficiário</p>
+      <p>Digite CPF ou NIS do beneficiário</p>
     </div>
 
     <div id="alert-container"></div>
@@ -28,8 +28,11 @@
       <input 
         type="text" 
         id="searchInput" 
-        placeholder="Digite para buscar..."
+        placeholder="Digite CPF (11 dígitos) ou NIS..."
         autocomplete="off"
+        inputmode="numeric"
+        pattern="[0-9]*"
+        maxlength="11"
       >
       <button onclick="buscarFamilia()">Buscar</button>
     </div>
