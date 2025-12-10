@@ -92,11 +92,19 @@ function iniciarImportacao() {
       // Renda média
       const rendaMedia = parseFloat(linha[' d.vlr_renda_media_fam'] || linha['d.vlr_renda_media_fam'] || linha['renda media'] || 0) || null;
       
-      // Validação - ignorar linhas sem dados essenciais
-      if (!codFamiliar || !nome || !cpf || !nis || cpf === '00000000000' || nome.length < 3) {
-        console.log(`⚠️  Linha ${index + 2}: Dados obrigatórios faltando ou inválidos - IGNORADO`);
+      // Validação - ignorar linhas sem dados essenciais (apenas cod_familiar e nome são obrigatórios)
+      if (!codFamiliar || !nome || nome.length < 3) {
+        console.log(`⚠️  Linha ${index + 2}: Código familiar ou nome faltando - IGNORADO`);
         erros++;
         return;
+      }
+      
+      // CPF e NIS podem estar vazios, mas não podem ser apenas zeros
+      if (cpf === '00000000000') {
+        cpf = ''; // Limpa CPF zerado
+      }
+      if (nis === '00000000000') {
+        nis = ''; // Limpa NIS zerado
       }
       
       // Agrupar por código familiar
