@@ -89,6 +89,9 @@ function iniciarImportacao() {
       const tel = (linha.num_tel_contato_1_fam || linha.TELEFONE1 || linha.TELEFONE || linha.telefone || '').toString().trim();
       const telefone = ddd && tel ? `(${ddd})${tel}` : tel;
       
+      // Renda média
+      const rendaMedia = parseFloat(linha.vlr_renda_media_fam || 0) || null;
+      
       // Validação - ignorar linhas sem dados essenciais
       if (!codFamiliar || !nome || !cpf || !nis || cpf === '00000000000' || nome.length < 3) {
         console.log(`⚠️  Linha ${index + 2}: Dados obrigatórios faltando ou inválidos - IGNORADO`);
@@ -102,6 +105,7 @@ function iniciarImportacao() {
           endereco,
           bairro,
           telefone,
+          rendaMedia,
           membros: [],
           cpfsAdicionados: new Set() // Controle de duplicados
         };
@@ -135,8 +139,8 @@ function iniciarImportacao() {
         
         // Inserir família
         db.run(
-          `INSERT INTO familias (cod_familiar, nome_responsavel, endereco, bairro, telefone) VALUES (?, ?, ?, ?, ?)`,
-          [codFamiliar, nomeResponsavel, familia.endereco, familia.bairro, familia.telefone],
+          `INSERT INTO familias (cod_familiar, nome_responsavel, endereco, bairro, telefone, renda_media) VALUES (?, ?, ?, ?, ?, ?)`,
+          [codFamiliar, nomeResponsavel, familia.endereco, familia.bairro, familia.telefone, familia.rendaMedia],
           function(err) {
             if (err) {
               console.error(`❌ Família ${codFamiliar}: Erro ao inserir - ${err.message}`);

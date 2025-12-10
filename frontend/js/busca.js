@@ -2,11 +2,14 @@ const API_URL = '/api';
 
 // Verificar autenticação
 const token = localStorage.getItem('token');
-const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+const usuarioStr = localStorage.getItem('usuario');
 
-if (!token) {
+if (!token || !usuarioStr) {
   window.location.href = 'login.html';
+  throw new Error('Não autenticado'); // Parar execução do script
 }
+
+const usuario = JSON.parse(usuarioStr);
 
 // Exibir nome do usuário
 document.getElementById('userName').textContent = usuario.nome || 'Usuário';

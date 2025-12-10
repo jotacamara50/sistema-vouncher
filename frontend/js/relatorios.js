@@ -2,11 +2,19 @@ const API_URL = '/api';
 
 // Verificar autenticação e permissão
 const token = localStorage.getItem('token');
-const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+const usuarioStr = localStorage.getItem('usuario');
 
-if (!token || usuario.tipo !== 'fiscal') {
+if (!token || !usuarioStr) {
+  window.location.href = 'login.html';
+  throw new Error('Não autenticado');
+}
+
+const usuario = JSON.parse(usuarioStr);
+
+if (usuario.tipo !== 'fiscal') {
   alert('Acesso negado. Apenas fiscais podem acessar relatórios.');
   window.location.href = 'busca.html';
+  throw new Error('Acesso negado');
 }
 
 // Exibir nome do usuário
