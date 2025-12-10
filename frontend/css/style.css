@@ -278,6 +278,26 @@ body {
   color: #333;
 }
 
+.info-item span.highlight {
+  color: #667eea;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.info-card {
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.info-card h3 {
+  color: #667eea;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
 /* Status badges */
 .status-badge {
   display: inline-block;

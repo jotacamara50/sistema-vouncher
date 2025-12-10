@@ -114,10 +114,28 @@ function exibirFamilia(familia) {
   // Cenário B: Entregar Kit (voucher já vinculado, mas kit não)
   else if (familia.numero_voucher && !familia.data_entrega_kit) {
     html += `
-      <div class="alert alert-info">
-        <strong>Voucher Nº ${familia.numero_voucher}</strong> já vinculado em ${formatarData(familia.data_entrega_voucher)}
+      <div class="info-card">
+        <h3>📋 Informações da Entrega</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Voucher Nº</label>
+            <span class="highlight">${familia.numero_voucher}</span>
+          </div>
+          <div class="info-item">
+            <label>CRAS</label>
+            <span>${familia.operador_unidade || 'Não informado'}</span>
+          </div>
+          <div class="info-item">
+            <label>Operador</label>
+            <span>${familia.operador_nome || 'Não informado'}</span>
+          </div>
+          <div class="info-item">
+            <label>Data de Entrega</label>
+            <span>${formatarData(familia.data_entrega_voucher)}</span>
+          </div>
+        </div>
       </div>
-      <div class="voucher-input">
+      <div class="voucher-input mt-20">
         <h3>🎁 Entregar Kit de Alimentação</h3>
         <p class="mb-20">Digite o número do voucher que o beneficiário apresentou</p>
         <input 
@@ -138,8 +156,31 @@ function exibirFamilia(familia) {
     html += `
       <div class="alert alert-success">
         <h3>✅ Processo Completo</h3>
-        <p><strong>Voucher:</strong> Nº ${familia.numero_voucher} - Entregue em ${formatarData(familia.data_entrega_voucher)}</p>
-        <p><strong>Kit:</strong> Entregue em ${formatarData(familia.data_entrega_kit)}</p>
+      </div>
+      <div class="info-card mt-20">
+        <h3>📋 Informações da Entrega</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Voucher Nº</label>
+            <span class="highlight">${familia.numero_voucher}</span>
+          </div>
+          <div class="info-item">
+            <label>CRAS</label>
+            <span>${familia.operador_unidade || 'Não informado'}</span>
+          </div>
+          <div class="info-item">
+            <label>Operador</label>
+            <span>${familia.operador_nome || 'Não informado'}</span>
+          </div>
+          <div class="info-item">
+            <label>Voucher Entregue em</label>
+            <span>${formatarData(familia.data_entrega_voucher)}</span>
+          </div>
+          <div class="info-item">
+            <label>Kit Entregue em</label>
+            <span>${formatarData(familia.data_entrega_kit)}</span>
+          </div>
+        </div>
       </div>
     `;
   }

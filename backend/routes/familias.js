@@ -49,31 +49,38 @@ router.get('/buscar', (req, res) => {
 router.get('/:id', (req, res) => {
   const { id } = req.params;
 
-  db.get('SELECT * FROM familias WHERE id = ?', [id], (err, familia) => {
-    if (err) {
-      return res.status(500).json({ error: 'Erro ao buscar família' });
-    }
-    if (!familia) {
-      return res.status(404).json({ error: 'Família não encontrada' });
-    }
-    
-    // Buscar membros da família
-    db.all(
-      'SELECT * FROM membros WHERE cod_familiar = ? ORDER BY nome',
-      [familia.cod_familiar],
-      (err, membros) => {
-        if (err) {
-          return res.status(500).json({ error: 'Erro ao buscar membros' });
-        }
-        
-        // Retornar família com membros
-        res.json({
-          ...familia,
-          membros: membros || []
-        });
+  db.get(
+    `SELECT f.*, u.nome as operador_nome, u.unidade as operador_unidade
+     FROM familias f
+     LEFT JOIN usuarios u ON f.usuario_entregou_id = u.id
+     WHERE f.id = ?`,
+    [id],
+    (err, familia) => {
+      if (err) {
+        return res.status(500).json({ error: 'Erro ao buscar família' });
       }
-    );
-  });
+      if (!familia) {
+        return res.status(404).json({ error: 'Família não encontrada' });
+      }
+      
+      // Buscar membros da família
+      db.all(
+        'SELECT * FROM membros WHERE cod_familiar = ? ORDER BY nome',
+        [familia.cod_familiar],
+        (err, membros) => {
+          if (err) {
+            return res.status(500).json({ error: 'Erro ao buscar membros' });
+          }
+          
+          // Retornar família com membros
+          res.json({
+            ...familia,
+            membros: membros || []
+          });
+        }
+      );
+    }
+  );
 });
 
 // Vincular voucher à família
