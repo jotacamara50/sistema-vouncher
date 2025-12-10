@@ -66,19 +66,28 @@ function iniciarImportacao() {
     const familias = {};
     
     dados.forEach((linha, index) => {
-      const codFamiliar = linha.COD_FAMILIAR || linha['COD FAMILIAR'] || linha.cod_familiar;
-      const nome = (linha.NOME || linha.nome || '').toString().trim();
+      // Mapear colunas da nova planilha
+      const codFamiliar = linha.cod_familiar_fam || linha.COD_FAMILIAR || linha['COD FAMILIAR'];
+      const nome = (linha.nom_pessoa || linha.NOME || linha.nome || '').toString().trim();
       
       // CPF e NIS com zeros à esquerda
-      let cpf = (linha.CPF || linha.cpf || '').toString().replace(/[.\-\s]/g, '').trim();
+      let cpf = (linha.num_cpf_pessoa || linha.CPF || linha.cpf || '').toString().replace(/[.\-\s]/g, '').trim();
       cpf = cpf.padStart(11, '0');
       
-      let nis = (linha.NIS || linha.nis || '').toString().replace(/[.\-\s]/g, '').trim();
+      let nis = (linha.num_nis_pessoa_atual || linha.NIS || linha.nis || '').toString().replace(/[.\-\s]/g, '').trim();
       nis = nis.padStart(11, '0');
       
-      const endereco = linha.ENDERECO || linha.endereco || '';
-      const bairro = linha.BAIRRO || linha.bairro || '';
-      const telefone = (linha.TELEFONE1 || linha.TELEFONE || linha.telefone || '').toString();
+      // Endereço completo (tipo_logradouro + numero)
+      const tipoLogradouro = linha.nom_tip_logradouro_fam || '';
+      const numeroLogradouro = linha.num_logradouro_fam || '';
+      const endereco = tipoLogradouro && numeroLogradouro ? `${tipoLogradouro}, ${numeroLogradouro}` : (linha.ENDERECO || linha.endereco || '');
+      
+      const bairro = linha.nom_localidade_fam || linha.BAIRRO || linha.bairro || '';
+      
+      // Telefone com DDD
+      const ddd = (linha.num_ddd_contato_1_fam || '').toString().trim();
+      const tel = (linha.num_tel_contato_1_fam || linha.TELEFONE1 || linha.TELEFONE || linha.telefone || '').toString().trim();
+      const telefone = ddd && tel ? `(${ddd})${tel}` : tel;
       
       // Validação - ignorar linhas sem dados essenciais
       if (!codFamiliar || !nome || !cpf || !nis || cpf === '00000000000' || nome.length < 3) {
