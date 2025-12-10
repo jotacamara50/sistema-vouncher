@@ -57,10 +57,18 @@ async function carregarFamilia() {
 function exibirFamilia(familia) {
   const content = document.getElementById('familiaContent');
 
+  // Verificar se a família está inabilitada por renda
+  const rendaAcima = familia.renda_media && parseFloat(familia.renda_media) > 218;
+
   // Card com informações da família
   let html = `
     <div class="familia-card">
       <h2>Família ${familia.cod_familiar}</h2>
+      ${rendaAcima ? `
+      <div class="alert alert-error">
+        <strong>⚠️ Família Inabilitada para Receber Voucher</strong><br>
+        <p>Esta família possui renda média acima do limite estabelecido (R$ 218,00) e não pode receber novos vouchers.</p>
+      </div>` : ''}
       <div class="info-grid">
         <div class="info-item">
           <label>Código Familiar</label>
@@ -73,7 +81,7 @@ function exibirFamilia(familia) {
         ${familia.renda_media ? `
         <div class="info-item">
           <label>Renda Média</label>
-          <span>R$ ${parseFloat(familia.renda_media).toFixed(2)}</span>
+          <span class="${rendaAcima ? 'text-error' : ''}">R$ ${parseFloat(familia.renda_media).toFixed(2)}</span>
         </div>` : ''}
         <div class="info-item">
           <label>Endereço</label>
@@ -100,24 +108,43 @@ function exibirFamilia(familia) {
     </div>
   `;
 
-  // Cenário A: Vincular Voucher (sem voucher ainda)
+  // Cenário A: Vincular Voucher (sem voucher ainda) - BLOQUEAR se renda acima
   if (!familia.numero_voucher) {
-    html += `
-      <div class="voucher-input">
-        <h3>📋 Vincular Voucher</h3>
-        <p class="mb-20">Digite o número do voucher físico</p>
-        <input 
-          type="number" 
-          id="numeroVoucher" 
-          placeholder="0000"
-          maxlength="6"
-          autofocus
-        >
-        <button class="btn btn-success mt-20" onclick="vincularVoucher()">
-          Vincular Voucher
-        </button>
-      </div>
-    `;
+    if (rendaAcima) {
+      html += `
+        <div class="voucher-input">
+          <h3>📋 Vincular Voucher</h3>
+          <p class="mb-20 text-error">Não é possível vincular voucher para esta família devido à renda acima do limite.</p>
+          <input 
+            type="number" 
+            id="numeroVoucher" 
+            placeholder="0000"
+            maxlength="6"
+            disabled
+          >
+          <button class="btn btn-disabled mt-20" disabled>
+            Voucher Bloqueado
+          </button>
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="voucher-input">
+          <h3>📋 Vincular Voucher</h3>
+          <p class="mb-20">Digite o número do voucher físico</p>
+          <input 
+            type="number" 
+            id="numeroVoucher" 
+            placeholder="0000"
+            maxlength="6"
+            autofocus
+          >
+          <button class="btn btn-success mt-20" onclick="vincularVoucher()">
+            Vincular Voucher
+          </button>
+        </div>
+      `;
+    }
   }
   // Cenário B: Entregar Kit (voucher já vinculado, mas kit não)
   else if (familia.numero_voucher && !familia.data_entrega_kit) {

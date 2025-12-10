@@ -112,7 +112,7 @@ router.post('/:id/vincular-voucher', (req, res) => {
         });
       }
 
-      // Verificar se a família já tem voucher
+      // Verificar se a família já tem voucher e validar renda
       db.get('SELECT * FROM familias WHERE id = ?', [id], (err, familia) => {
         if (err) {
           return res.status(500).json({ error: 'Erro ao buscar família' });
@@ -125,6 +125,13 @@ router.post('/:id/vincular-voucher', (req, res) => {
         if (familia.numero_voucher) {
           return res.status(400).json({ 
             error: 'Esta família já possui um voucher vinculado' 
+          });
+        }
+
+        // VALIDAÇÃO: Verificar se renda média está acima do limite
+        if (familia.renda_media && parseFloat(familia.renda_media) > 218) {
+          return res.status(400).json({ 
+            error: 'Esta família não é elegível para receber voucher. Renda média acima do limite de R$ 218,00.' 
           });
         }
 

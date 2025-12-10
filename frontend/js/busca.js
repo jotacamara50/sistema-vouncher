@@ -70,8 +70,12 @@ function exibirResultados(familias) {
   const resultsDiv = document.getElementById('results');
   
   resultsDiv.innerHTML = familias.map(familia => {
+    // Verificar se renda média está acima do limite
+    const rendaAcima = familia.renda_media && parseFloat(familia.renda_media) > 218;
+    
     const statusVoucher = familia.numero_voucher ? 
       '<span class="status-badge status-concluido">Voucher Entregue</span>' : 
+      rendaAcima ? '<span class="status-badge status-inabilitado">Renda Acima do Limite</span>' :
       '<span class="status-badge status-pendente">Pendente</span>';
     
     const statusKit = familia.data_entrega_kit ? 
@@ -84,8 +88,11 @@ function exibirResultados(familias) {
       ? `${familia.nome_membro_buscado}` 
       : `Família ${familia.cod_familiar}`;
 
+    // Adicionar classe de inabilitado se renda estiver acima
+    const classeInabilitado = rendaAcima ? ' result-item-inabilitado' : '';
+
     return `
-      <div class="result-item" onclick="abrirFamilia(${familia.id})">
+      <div class="result-item${classeInabilitado}" onclick="abrirFamilia(${familia.id})">
         <h3>${tituloFamilia} ${statusVoucher} ${statusKit}</h3>
         <p><strong>👥 Membros:</strong> ${totalMembros} pessoa(s)</p>
         <p><strong>Código Familiar:</strong> ${familia.cod_familiar}</p>
