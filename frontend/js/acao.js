@@ -70,6 +70,11 @@ function exibirFamilia(familia) {
           <label>Telefone</label>
           <span>${familia.telefone || 'Não informado'}</span>
         </div>
+        ${familia.renda_media ? `
+        <div class="info-item">
+          <label>Renda Média</label>
+          <span>R$ ${parseFloat(familia.renda_media).toFixed(2)}</span>
+        </div>` : ''}
         <div class="info-item">
           <label>Endereço</label>
           <span>${familia.endereco}</span>

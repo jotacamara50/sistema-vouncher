@@ -89,6 +89,7 @@ function exibirResultados(familias) {
         <h3>${tituloFamilia} ${statusVoucher} ${statusKit}</h3>
         <p><strong>👥 Membros:</strong> ${totalMembros} pessoa(s)</p>
         <p><strong>Código Familiar:</strong> ${familia.cod_familiar}</p>
+        ${familia.renda_media ? `<p><strong>💰 Renda Média:</strong> R$ ${parseFloat(familia.renda_media).toFixed(2)}</p>` : ''}
         <p><strong>Endereço:</strong> ${familia.endereco}${familia.bairro ? ' - ' + familia.bairro : ''}</p>
         ${familia.telefone ? `<p><strong>Telefone:</strong> ${familia.telefone}</p>` : ''}
       </div>
