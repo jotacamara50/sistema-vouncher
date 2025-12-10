@@ -11,6 +11,14 @@ if (!token) {
 // Exibir nome do usuário
 document.getElementById('userName').textContent = usuario.nome || 'Usuário';
 
+// Mostrar botão de relatórios se for fiscal
+if (usuario.tipo === 'fiscal') {
+  const btnRelatorios = document.getElementById('btnRelatorios');
+  if (btnRelatorios) {
+    btnRelatorios.style.display = 'inline-block';
+  }
+}
+
 // Buscar ao pressionar Enter
 document.getElementById('searchInput').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
@@ -95,6 +103,10 @@ function logout() {
   window.location.href = 'login.html';
 }
 
+function abrirRelatorios() {
+  window.location.href = 'relatorios.html';
+}
+
 function mostrarAlerta(mensagem, tipo = 'info') {
   const alertContainer = document.getElementById('alert-container');
   const alertClass = tipo === 'error' ? 'alert-error' : tipo === 'success' ? 'alert-success' : 'alert-info';
@@ -109,3 +121,4 @@ function mostrarAlerta(mensagem, tipo = 'info') {
     alertContainer.innerHTML = '';
   }, 5000);
 }
+

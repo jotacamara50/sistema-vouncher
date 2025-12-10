@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relatórios - Sistema de Vouchers</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="logo.png" alt="Logo Prefeitura" class="logo-small">
+      <h1>📊 Relatórios</h1>
+      <div class="user-info">
+        <span id="userName"></span>
+        <button onclick="logout()" class="btn btn-secondary">Sair</button>
+      </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="stats-container" id="statsContainer">
+      <div class="stat-card">
+        <h3>Famílias Atendidas</h3>
+        <p class="stat-number" id="totalFamilias">-</p>
+      </div>
+      <div class="stat-card">
+        <h3>Vouchers Entregues</h3>
+        <p class="stat-number" id="totalVouchers">-</p>
+      </div>
+      <div class="stat-card">
+        <h3>Kits Entregues</h3>
+        <p class="stat-number" id="totalKits">-</p>
+      </div>
+      <div class="stat-card">
+        <h3>Pessoas Atendidas</h3>
+        <p class="stat-number" id="totalPessoas">-</p>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-container">
+      <h2>Filtrar Entregas</h2>
+      <div class="filter-grid">
+        <div>
+          <label>Data Início</label>
+          <input type="date" id="dataInicio">
+        </div>
+        <div>
+          <label>Data Fim</label>
+          <input type="date" id="dataFim">
+        </div>
+        <div>
+          <label>Atendente</label>
+          <select id="usuarioFiltro">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: flex-end;">
+          <button onclick="buscarRelatorio()" class="btn btn-primary">Buscar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Por Atendente -->
+    <div class="section">
+      <h2>Entregas por Atendente</h2>
+      <div id="atendentesContainer"></div>
+    </div>
+
+    <!-- Tabela de Entregas -->
+    <div class="section">
+      <h2>Detalhamento de Entregas</h2>
+      <div class="table-actions">
+        <button onclick="exportarExcel()" class="btn btn-success">📄 Exportar Excel</button>
+        <button onclick="exportarPDF()" class="btn btn-danger">📑 Exportar PDF</button>
+      </div>
+      <div id="loading" class="hidden">Carregando...</div>
+      <div id="entregasContainer"></div>
+    </div>
+
+    <!-- Botão Voltar -->
+    <div class="mt-20">
+      <button onclick="voltarBusca()" class="btn btn-secondary">← Voltar para Busca</button>
+    </div>
+  </div>
+
+  <div id="alert-container"></div>
+
+  <script src="js/relatorios.js"></script>
+</body>
+</html>

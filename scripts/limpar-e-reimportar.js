@@ -24,13 +24,8 @@ db.serialize(() => {
     console.log('✅ Tabela familias limpa');
   });
 
-  db.run('DELETE FROM usuarios', (err) => {
-    if (err) {
-      console.error('❌ Erro ao limpar usuarios:', err.message);
-      process.exit(1);
-    }
-    console.log('✅ Tabela usuarios limpa');
-  });
+  // NÃO limpar usuários (preservar atendentes e fiscais)
+  console.log('⚠️  Usuários preservados (não foram apagados)');
 
   // Aguardar limpeza e iniciar importação
   setTimeout(() => {
@@ -116,10 +111,13 @@ function iniciarImportacao() {
       return new Promise((resolve) => {
         const familia = familias[codFamiliar];
         
+        // Usar primeiro membro como responsável
+        const nomeResponsavel = familia.membros.length > 0 ? familia.membros[0].nome : 'SEM NOME';
+        
         // Inserir família
         db.run(
-          `INSERT INTO familias (cod_familiar, endereco, bairro, telefone) VALUES (?, ?, ?, ?)`,
-          [codFamiliar, familia.endereco, familia.bairro, familia.telefone],
+          `INSERT INTO familias (cod_familiar, nome_responsavel, endereco, bairro, telefone) VALUES (?, ?, ?, ?, ?)`,
+          [codFamiliar, nomeResponsavel, familia.endereco, familia.bairro, familia.telefone],
           function(err) {
             if (err) {
               console.error(`❌ Família ${codFamiliar}: Erro ao inserir - ${err.message}`);

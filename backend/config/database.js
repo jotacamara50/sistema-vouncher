@@ -18,6 +18,7 @@ db.serialize(() => {
     CREATE TABLE IF NOT EXISTS familias (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       cod_familiar VARCHAR(50) UNIQUE NOT NULL,
+      nome_responsavel VARCHAR(255) NOT NULL,
       endereco TEXT,
       bairro VARCHAR(100),
       telefone VARCHAR(20),
@@ -59,6 +60,8 @@ db.serialize(() => {
       nome VARCHAR(255) NOT NULL,
       login VARCHAR(50) UNIQUE NOT NULL,
       senha VARCHAR(255) NOT NULL,
+      unidade VARCHAR(100) NOT NULL,
+      tipo VARCHAR(20) DEFAULT 'atendente' CHECK(tipo IN ('atendente', 'fiscal')),
       ativo BOOLEAN DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )

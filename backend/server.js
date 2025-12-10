@@ -21,6 +21,7 @@ app.use('/pdfs', express.static(path.join(__dirname, '../pdfs')));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/familias', require('./routes/familias'));
 app.use('/api/import', require('./routes/import'));
+app.use('/api/relatorios', require('./routes/relatorios'));
 
 // Rota raiz - redirecionar para login
 app.get('/', (req, res) => {

@@ -32,7 +32,12 @@ router.post('/login', (req, res) => {
       }
 
       const token = jwt.sign(
-        { id: usuario.id, nome: usuario.nome },
+        { 
+          id: usuario.id, 
+          nome: usuario.nome, 
+          unidade: usuario.unidade,
+          tipo: usuario.tipo 
+        },
         SECRET_KEY,
         { expiresIn: '8h' }
       );
@@ -42,7 +47,9 @@ router.post('/login', (req, res) => {
         usuario: {
           id: usuario.id,
           nome: usuario.nome,
-          login: usuario.login
+          login: usuario.login,
+          unidade: usuario.unidade,
+          tipo: usuario.tipo
         }
       });
     }
@@ -51,13 +58,23 @@ router.post('/login', (req, res) => {
 
 // Criar primeiro usuário (rota temporária)
 router.post('/criar-admin', async (req, res) => {
-  const { nome, login, senha } = req.body;
+  const { nome, login, senha, unidade, tipo } = req.body;
+
+  if (!unidade) {
+    return res.status(400).json({ error: 'Unidade é obrigatória' });
+  }
+
+  const tipoUsuario = tipo || 'atendente';
+
+  if (!['atendente', 'fiscal'].includes(tipoUsuario)) {
+    return res.status(400).json({ error: 'Tipo deve ser "atendente" ou "fiscal"' });
+  }
 
   const senhaHash = await bcrypt.hash(senha, 10);
 
   db.run(
-    'INSERT INTO usuarios (nome, login, senha) VALUES (?, ?, ?)',
-    [nome, login, senhaHash],
+    'INSERT INTO usuarios (nome, login, senha, unidade, tipo) VALUES (?, ?, ?, ?, ?)',
+    [nome, login, senhaHash, unidade, tipoUsuario],
     function(err) {
       if (err) {
         return res.status(500).json({ error: 'Erro ao criar usuário' });
