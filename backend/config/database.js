@@ -16,7 +16,7 @@ db.serialize(() => {
   // Tabela de famílias (dados gerais da família)
   db.run(`
     CREATE TABLE IF NOT EXISTS familias (
-      id INTEGER PRIMARY KEY AUTOCOMPREMENT,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
       cod_familiar VARCHAR(50) UNIQUE NOT NULL,
       nome_responsavel VARCHAR(255) NOT NULL,
       endereco TEXT,

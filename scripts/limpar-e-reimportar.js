@@ -66,31 +66,31 @@ function iniciarImportacao() {
     const familias = {};
     
     dados.forEach((linha, index) => {
-      // Mapear colunas da nova planilha
-      const codFamiliar = linha.cod_familiar_fam || linha.COD_FAMILIAR || linha['COD FAMILIAR'];
-      const nome = (linha.nom_pessoa || linha.NOME || linha.nome || '').toString().trim();
+      // Mapear colunas da planilha
+      const codFamiliar = linha['COD_FAMILIAR'] || linha.cod_familiar_fam || linha.COD_FAMILIAR;
+      const nome = (linha['nome da pessoa'] || linha.nom_pessoa || linha.NOME || '').toString().trim();
       
       // CPF e NIS com zeros à esquerda
-      let cpf = (linha.num_cpf_pessoa || linha.CPF || linha.cpf || '').toString().replace(/[.\-\s]/g, '').trim();
+      let cpf = (linha['cpf'] || linha.num_cpf_pessoa || linha.CPF || '').toString().replace(/[.\-\s]/g, '').trim();
       cpf = cpf.padStart(11, '0');
       
-      let nis = (linha.num_nis_pessoa_atual || linha.NIS || linha.nis || '').toString().replace(/[.\-\s]/g, '').trim();
+      let nis = (linha['nis'] || linha.num_nis_pessoa_atual || linha.NIS || '').toString().replace(/[.\-\s]/g, '').trim();
       nis = nis.padStart(11, '0');
       
-      // Endereço completo (tipo_logradouro + numero)
-      const tipoLogradouro = linha.nom_tip_logradouro_fam || '';
-      const numeroLogradouro = linha.num_logradouro_fam || '';
-      const endereco = tipoLogradouro && numeroLogradouro ? `${tipoLogradouro}, ${numeroLogradouro}` : (linha.ENDERECO || linha.endereco || '');
+      // Endereço completo (rua + numero)
+      const tipoLogradouro = linha['rua'] || linha.nom_tip_logradouro_fam || '';
+      const numeroLogradouro = linha['numero'] || linha.num_logradouro_fam || '';
+      const endereco = tipoLogradouro && numeroLogradouro ? `${tipoLogradouro}, ${numeroLogradouro}` : (linha.ENDERECO || '');
       
-      const bairro = linha.nom_localidade_fam || linha.BAIRRO || linha.bairro || '';
+      const bairro = linha['bairro'] || linha.nom_localidade_fam || linha.BAIRRO || '';
       
       // Telefone com DDD
-      const ddd = (linha.num_ddd_contato_1_fam || '').toString().trim();
-      const tel = (linha.num_tel_contato_1_fam || linha.TELEFONE1 || linha.TELEFONE || linha.telefone || '').toString().trim();
+      const ddd = (linha['ddd'] || linha.num_ddd_contato_1_fam || '').toString().trim();
+      const tel = (linha['telefone'] || linha.num_tel_contato_1_fam || linha.TELEFONE || '').toString().trim();
       const telefone = ddd && tel ? `(${ddd})${tel}` : tel;
       
       // Renda média
-      const rendaMedia = parseFloat(linha.vlr_renda_media_fam || 0) || null;
+      const rendaMedia = parseFloat(linha['renda media'] || linha.vlr_renda_media_fam || 0) || null;
       
       // Validação - ignorar linhas sem dados essenciais
       if (!codFamiliar || !nome || !cpf || !nis || cpf === '00000000000' || nome.length < 3) {
