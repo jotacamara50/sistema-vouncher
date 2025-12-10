@@ -100,7 +100,7 @@ function exibirResultados(familias) {
     const statusVoucher = familia.numero_voucher ? 
       '<span class="status-badge status-concluido">Voucher Entregue</span>' : 
       rendaAcima ? '<span class="status-badge status-inabilitado">Renda Acima do Limite</span>' :
-      '<span class="status-badge status-pendente">Pendente</span>';
+      '<span class="status-badge status-pendente">Perfil Aprovado</span>';
     
     const statusKit = familia.data_entrega_kit ? 
       '<span class="status-badge status-concluido">Kit Entregue</span>' : '';
