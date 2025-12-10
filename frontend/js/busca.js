@@ -66,13 +66,15 @@ function exibirResultados(familias) {
     const statusKit = familia.data_entrega_kit ? 
       '<span class="status-badge status-concluido">Kit Entregue</span>' : '';
 
+    const totalMembros = familia.total_membros || 0;
+
     return `
       <div class="result-item" onclick="abrirFamilia(${familia.id})">
-        <h3>${familia.nome_responsavel} ${statusVoucher} ${statusKit}</h3>
-        <p><strong>CPF:</strong> ${formatarCPF(familia.cpf)}</p>
-        <p><strong>NIS:</strong> ${familia.nis}</p>
+        <h3>Família ${familia.cod_familiar} ${statusVoucher} ${statusKit}</h3>
+        <p><strong>👥 Membros:</strong> ${totalMembros} pessoa(s)</p>
         <p><strong>Código Familiar:</strong> ${familia.cod_familiar}</p>
         <p><strong>Endereço:</strong> ${familia.endereco}${familia.bairro ? ' - ' + familia.bairro : ''}</p>
+        ${familia.telefone ? `<p><strong>Telefone:</strong> ${familia.telefone}</p>` : ''}
       </div>
     `;
   }).join('');

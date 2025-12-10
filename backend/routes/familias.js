@@ -18,20 +18,26 @@ router.get('/buscar', (req, res) => {
   // Remover caracteres especiais para busca por CPF
   const termoLimpo = termo.replace(/[.\-]/g, '');
 
+  // Buscar membros que correspondam ao termo
   const sql = `
-    SELECT * FROM familias 
-    WHERE cpf LIKE ? 
-    OR nis LIKE ? 
-    OR nome_responsavel LIKE ?
-    ORDER BY nome_responsavel
+    SELECT DISTINCT f.*, 
+           (SELECT COUNT(*) FROM membros WHERE cod_familiar = f.cod_familiar) as total_membros
+    FROM familias f
+    INNER JOIN membros m ON f.cod_familiar = m.cod_familiar
+    WHERE m.cpf LIKE ? 
+    OR m.nis LIKE ? 
+    OR m.nome LIKE ?
+    OR f.cod_familiar LIKE ?
+    ORDER BY f.cod_familiar
     LIMIT 50
   `;
 
   db.all(
     sql,
-    [`%${termoLimpo}%`, `%${termoLimpo}%`, `%${termo}%`],
+    [`%${termoLimpo}%`, `%${termoLimpo}%`, `%${termo}%`, `%${termo}%`],
     (err, rows) => {
       if (err) {
+        console.error('Erro ao buscar famílias:', err);
         return res.status(500).json({ error: 'Erro ao buscar famílias' });
       }
       res.json(rows);
@@ -39,18 +45,34 @@ router.get('/buscar', (req, res) => {
   );
 });
 
-// Obter família por ID
+// Obter família por ID com membros
 router.get('/:id', (req, res) => {
   const { id } = req.params;
 
-  db.get('SELECT * FROM familias WHERE id = ?', [id], (err, row) => {
+  db.get('SELECT * FROM familias WHERE id = ?', [id], (err, familia) => {
     if (err) {
       return res.status(500).json({ error: 'Erro ao buscar família' });
     }
-    if (!row) {
+    if (!familia) {
       return res.status(404).json({ error: 'Família não encontrada' });
     }
-    res.json(row);
+    
+    // Buscar membros da família
+    db.all(
+      'SELECT * FROM membros WHERE cod_familiar = ? ORDER BY nome',
+      [familia.cod_familiar],
+      (err, membros) => {
+        if (err) {
+          return res.status(500).json({ error: 'Erro ao buscar membros' });
+        }
+        
+        // Retornar família com membros
+        res.json({
+          ...familia,
+          membros: membros || []
+        });
+      }
+    );
   });
 });
 
@@ -170,14 +192,28 @@ router.post('/:id/entregar-kit', (req, res) => {
           return res.status(500).json({ error: 'Erro ao registrar entrega do kit' });
         }
 
-        // Gerar PDF do recibo
-        gerarReciboPDF(familia, (pdfPath) => {
-          res.json({ 
-            message: 'Kit entregue com sucesso',
-            data_entrega: new Date().toISOString(),
-            recibo_pdf: pdfPath
-          });
-        });
+        // Buscar membros antes de gerar PDF
+        db.all(
+          'SELECT * FROM membros WHERE cod_familiar = ? ORDER BY nome',
+          [familia.cod_familiar],
+          (err, membros) => {
+            if (err) {
+              return res.status(500).json({ error: 'Erro ao buscar membros' });
+            }
+
+            // Adicionar membros ao objeto familia
+            familia.membros = membros || [];
+
+            // Gerar PDF do recibo com membros
+            gerarReciboPDF(familia, (pdfPath) => {
+              res.json({ 
+                message: 'Kit entregue com sucesso',
+                data_entrega: new Date().toISOString(),
+                recibo_pdf: pdfPath
+              });
+            });
+          }
+        );
       }
     );
   });

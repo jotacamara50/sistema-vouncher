@@ -57,16 +57,8 @@ function exibirFamilia(familia) {
   // Card com informações da família
   let html = `
     <div class="familia-card">
-      <h2>${familia.nome_responsavel}</h2>
+      <h2>Família ${familia.cod_familiar}</h2>
       <div class="info-grid">
-        <div class="info-item">
-          <label>CPF</label>
-          <span>${formatarCPF(familia.cpf)}</span>
-        </div>
-        <div class="info-item">
-          <label>NIS</label>
-          <span>${familia.nis}</span>
-        </div>
         <div class="info-item">
           <label>Código Familiar</label>
           <span>${familia.cod_familiar}</span>
@@ -83,6 +75,19 @@ function exibirFamilia(familia) {
           <label>Bairro</label>
           <span>${familia.bairro || 'Não informado'}</span>
         </div>
+      </div>
+
+      <h3 class="mt-20">👥 Membros da Família</h3>
+      <div class="membros-list">
+        ${familia.membros && familia.membros.length > 0 ? 
+          familia.membros.map(membro => `
+            <div class="membro-item">
+              <strong>${membro.nome}</strong><br>
+              <small>CPF: ${formatarCPF(membro.cpf)} | NIS: ${membro.nis}</small>
+            </div>
+          `).join('') 
+          : '<p>Nenhum membro cadastrado</p>'
+        }
       </div>
     </div>
   `;

@@ -32,28 +32,39 @@ function gerarReciboPDF(familia, callback) {
   // Informações da família
   doc
     .fontSize(12)
-    .text(`Nome do Responsável: ${familia.nome_responsavel}`, { continued: false })
-    .moveDown(0.5);
-
-  doc
-    .text(`NIS: ${familia.nis}`)
-    .moveDown(0.5);
-
-  doc
-    .text(`CPF: ${familia.cpf}`)
-    .moveDown(0.5);
-
-  doc
-    .text(`Código Familiar: ${familia.cod_familiar}`)
+    .text(`Código Familiar: ${familia.cod_familiar}`, { continued: false })
     .moveDown(0.5);
 
   doc
     .text(`Endereço: ${familia.endereco}${familia.bairro ? ' - ' + familia.bairro : ''}`)
     .moveDown(0.5);
 
+  if (familia.telefone) {
+    doc.text(`Telefone: ${familia.telefone}`).moveDown(0.5);
+  }
+
   doc
     .text(`Número do Voucher: ${familia.numero_voucher}`)
-    .moveDown(2);
+    .moveDown(1.5);
+
+  // Lista de membros
+  if (familia.membros && familia.membros.length > 0) {
+    doc
+      .fontSize(14)
+      .text('Membros da Família:', { underline: true })
+      .moveDown(0.5);
+
+    familia.membros.forEach((membro, index) => {
+      doc
+        .fontSize(11)
+        .text(`${index + 1}. ${membro.nome}`)
+        .fontSize(10)
+        .text(`   CPF: ${membro.cpf} | NIS: ${membro.nis}`, { color: '#666' })
+        .moveDown(0.3);
+    });
+
+    doc.moveDown(1);
+  }
 
   // Data de entrega
   const dataAtual = new Date().toLocaleString('pt-BR', {

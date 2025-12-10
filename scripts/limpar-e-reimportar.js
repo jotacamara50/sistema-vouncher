@@ -8,7 +8,14 @@ console.log('='.repeat(60));
 console.log('🗑️  Limpando banco de dados...');
 
 db.serialize(() => {
-  // Limpar tabelas
+  db.run('DELETE FROM membros', (err) => {
+    if (err) {
+      console.error('❌ Erro ao limpar membros:', err.message);
+      process.exit(1);
+    }
+    console.log('✅ Tabela membros limpa');
+  });
+
   db.run('DELETE FROM familias', (err) => {
     if (err) {
       console.error('❌ Erro ao limpar familias:', err.message);
@@ -55,81 +62,106 @@ function iniciarImportacao() {
     console.log(`📋 Total de linhas: ${dados.length}`);
     console.log('');
 
-    let importados = 0;
-    let ignorados = 0;
+    let familiasImportadas = 0;
+    let membrosImportados = 0;
     let erros = 0;
+    
+    // Agrupar dados por código familiar
+    const familias = {};
+    
+    dados.forEach((linha, index) => {
+      const codFamiliar = linha.COD_FAMILIAR || linha['COD FAMILIAR'] || linha.cod_familiar;
+      const nome = linha.NOME || linha.nome;
+      
+      // CPF e NIS com zeros à esquerda
+      let cpf = (linha.CPF || linha.cpf || '').toString().replace(/[.\-\s]/g, '');
+      cpf = cpf.padStart(11, '0');
+      
+      let nis = (linha.NIS || linha.nis || '').toString().replace(/[.\-\s]/g, '');
+      nis = nis.padStart(11, '0');
+      
+      const endereco = linha.ENDERECO || linha.endereco || '';
+      const bairro = linha.BAIRRO || linha.bairro || '';
+      const telefone = (linha.TELEFONE1 || linha.TELEFONE || linha.telefone || '').toString();
+      
+      // Validação
+      if (!codFamiliar || !nome || !cpf || !nis) {
+        console.log(`⚠️  Linha ${index + 2}: Dados obrigatórios faltando - IGNORADO`);
+        erros++;
+        return;
+      }
+      
+      // Agrupar por código familiar
+      if (!familias[codFamiliar]) {
+        familias[codFamiliar] = {
+          endereco,
+          bairro,
+          telefone,
+          membros: []
+        };
+      }
+      
+      // Adicionar membro
+      familias[codFamiliar].membros.push({ nome, cpf, nis });
+    });
 
-    // Processar cada linha
-    const processarLinha = (linha, index) => {
+    console.log(`👨‍👩‍👧‍👦 Total de famílias encontradas: ${Object.keys(familias).length}`);
+    console.log('');
+
+    // Inserir famílias e membros
+    const codsFamiliares = Object.keys(familias);
+    let processed = 0;
+
+    const processarFamilia = (codFamiliar) => {
       return new Promise((resolve) => {
-        // Extrair dados
-        const codFamiliar = linha.COD_FAMILIAR || linha['COD FAMILIAR'] || linha.cod_familiar;
-        const nome = linha.NOME || linha.nome;
+        const familia = familias[codFamiliar];
         
-        // CPF: remover formatação e completar com zeros à esquerda
-        let cpf = (linha.CPF || linha.cpf || '').toString().replace(/[.\-\s]/g, '');
-        cpf = cpf.padStart(11, '0');
-        
-        // NIS: remover formatação e completar com zeros à esquerda
-        let nis = (linha.NIS || linha.nis || '').toString().replace(/[.\-\s]/g, '');
-        nis = nis.padStart(11, '0');
-        
-        const endereco = linha.ENDERECO || linha.endereco || '';
-        const bairro = linha.BAIRRO || linha.bairro || '';
-        const telefone = (linha.TELEFONE1 || linha.TELEFONE || linha.telefone || '').toString();
-
-        // Validação básica
-        if (!codFamiliar || !nome || !cpf || !nis) {
-          console.log(`⚠️  Linha ${index + 2}: Dados obrigatórios faltando - IGNORADO`);
-          erros++;
-          resolve();
-          return;
-        }
-
-        // Verificar se a família já existe
-        db.get(
-          'SELECT id FROM familias WHERE cod_familiar = ?',
-          [codFamiliar],
-          (err, row) => {
+        // Inserir família
+        db.run(
+          `INSERT INTO familias (cod_familiar, endereco, bairro, telefone) VALUES (?, ?, ?, ?)`,
+          [codFamiliar, familia.endereco, familia.bairro, familia.telefone],
+          function(err) {
             if (err) {
-              console.error(`❌ Linha ${index + 2}: Erro no banco - ${err.message}`);
+              console.error(`❌ Família ${codFamiliar}: Erro ao inserir - ${err.message}`);
               erros++;
               resolve();
               return;
             }
-
-            if (row) {
-              console.log(`⏭️  Linha ${index + 2}: Código ${codFamiliar} já existe - IGNORADO`);
-              ignorados++;
-              resolve();
-              return;
-            }
-
-            // Inserir nova família
-            db.run(
-              `INSERT INTO familias (cod_familiar, nome_responsavel, cpf, nis, endereco, bairro, telefone)
-               VALUES (?, ?, ?, ?, ?, ?, ?)`,
-              [codFamiliar, nome, cpf, nis, endereco, bairro, telefone],
-              (err) => {
-                if (err) {
-                  console.error(`❌ Linha ${index + 2}: Erro ao inserir - ${err.message}`);
-                  erros++;
-                } else {
-                  console.log(`✅ Linha ${index + 2}: ${nome} (CPF: ${cpf}) - IMPORTADO`);
-                  importados++;
+            
+            const familiaId = this.lastID;
+            familiasImportadas++;
+            
+            // Inserir membros
+            let membrosInseridos = 0;
+            familia.membros.forEach((membro, idx) => {
+              db.run(
+                `INSERT INTO membros (familia_id, cod_familiar, nome, cpf, nis) VALUES (?, ?, ?, ?, ?)`,
+                [familiaId, codFamiliar, membro.nome, membro.cpf, membro.nis],
+                (err) => {
+                  if (err) {
+                    console.error(`❌ Membro ${membro.nome}: Erro - ${err.message}`);
+                  } else {
+                    membrosInseridos++;
+                    membrosImportados++;
+                  }
+                  
+                  // Quando todos os membros forem processados
+                  if (membrosInseridos === familia.membros.length) {
+                    console.log(`✅ Família ${codFamiliar}: ${familia.membros.length} membro(s) importado(s)`);
+                    resolve();
+                  }
                 }
-                resolve();
-              }
-            );
+              );
+            });
           }
         );
       });
     };
 
-    // Processar todas as linhas
+    // Processar todas as famílias
     (async () => {
-      for (let i = 0; i < dados.length; i++) {
-        await processarLinha(dados[i], i);
+      for (const codFamiliar of codsFamiliares) {
+        await processarFamilia(codFamiliar);
       }
 
       // Resumo final
@@ -137,9 +169,9 @@ function iniciarImportacao() {
       console.log('='.repeat(60));
       console.log('📊 RESUMO DA IMPORTAÇÃO');
       console.log('='.repeat(60));
-      console.log(`✅ Importados com sucesso: ${importados}`);
-      console.log(`⏭️  Ignorados (duplicados): ${ignorados}`);
-      console.log(`❌ Erros (dados incompletos): ${erros}`);
+      console.log(`👨‍👩‍👧‍👦 Famílias importadas: ${familiasImportadas}`);
+      console.log(`👤 Membros importados: ${membrosImportados}`);
+      console.log(`❌ Erros: ${erros}`);
       console.log('='.repeat(60));
 
       db.close(() => {

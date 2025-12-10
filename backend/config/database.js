@@ -13,14 +13,11 @@ const db = new sqlite3.Database(dbPath, (err) => {
 
 // Criar tabelas
 db.serialize(() => {
-  // Tabela de famílias
+  // Tabela de famílias (dados gerais da família)
   db.run(`
     CREATE TABLE IF NOT EXISTS familias (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      cod_familiar VARCHAR(50) NOT NULL,
-      nome_responsavel VARCHAR(255) NOT NULL,
-      cpf VARCHAR(14) NOT NULL,
-      nis VARCHAR(20) NOT NULL,
+      cod_familiar VARCHAR(50) UNIQUE NOT NULL,
       endereco TEXT,
       bairro VARCHAR(100),
       telefone VARCHAR(20),
@@ -33,11 +30,27 @@ db.serialize(() => {
     )
   `);
 
+  // Tabela de membros (cada pessoa da família)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS membros (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      familia_id INTEGER NOT NULL,
+      cod_familiar VARCHAR(50) NOT NULL,
+      nome VARCHAR(255) NOT NULL,
+      cpf VARCHAR(14) NOT NULL,
+      nis VARCHAR(20) NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (familia_id) REFERENCES familias(id) ON DELETE CASCADE
+    )
+  `);
+
   // Índices para busca rápida
   db.run(`CREATE INDEX IF NOT EXISTS idx_cod_familiar ON familias(cod_familiar)`);
-  db.run(`CREATE INDEX IF NOT EXISTS idx_cpf ON familias(cpf)`);
-  db.run(`CREATE INDEX IF NOT EXISTS idx_nis ON familias(nis)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_numero_voucher ON familias(numero_voucher)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_membros_familia_id ON membros(familia_id)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_membros_cod_familiar ON membros(cod_familiar)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_membros_cpf ON membros(cpf)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_membros_nis ON membros(nis)`);
 
   // Tabela de usuários
   db.run(`
