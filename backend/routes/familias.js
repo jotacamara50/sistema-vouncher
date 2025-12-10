@@ -18,10 +18,14 @@ router.get('/buscar', (req, res) => {
   // Remover caracteres especiais para busca por CPF
   const termoLimpo = termo.replace(/[.\-]/g, '');
 
-  // Buscar membros que correspondam ao termo
+  // Buscar membros que correspondam ao termo e retornar com nome do membro encontrado
   const sql = `
     SELECT DISTINCT f.*, 
-           (SELECT COUNT(*) FROM membros WHERE cod_familiar = f.cod_familiar) as total_membros
+           (SELECT COUNT(*) FROM membros WHERE cod_familiar = f.cod_familiar) as total_membros,
+           (SELECT m2.nome FROM membros m2 
+            WHERE m2.cod_familiar = f.cod_familiar 
+            AND (m2.cpf LIKE ? OR m2.nis LIKE ? OR m2.nome LIKE ?)
+            LIMIT 1) as nome_membro_buscado
     FROM familias f
     INNER JOIN membros m ON f.cod_familiar = m.cod_familiar
     WHERE m.cpf LIKE ? 
@@ -34,7 +38,7 @@ router.get('/buscar', (req, res) => {
 
   db.all(
     sql,
-    [`%${termoLimpo}%`, `%${termoLimpo}%`, `%${termo}%`, `%${termo}%`],
+    [`%${termoLimpo}%`, `%${termoLimpo}%`, `%${termo}%`, `%${termoLimpo}%`, `%${termoLimpo}%`, `%${termo}%`, `%${termo}%`],
     (err, rows) => {
       if (err) {
         console.error('Erro ao buscar famílias:', err);

@@ -75,10 +75,15 @@ function exibirResultados(familias) {
       '<span class="status-badge status-concluido">Kit Entregue</span>' : '';
 
     const totalMembros = familia.total_membros || 0;
+    
+    // Se encontrou o nome do membro buscado, usar ele no título
+    const tituloFamilia = familia.nome_membro_buscado 
+      ? `${familia.nome_membro_buscado}` 
+      : `Família ${familia.cod_familiar}`;
 
     return `
       <div class="result-item" onclick="abrirFamilia(${familia.id})">
-        <h3>Família ${familia.cod_familiar} ${statusVoucher} ${statusKit}</h3>
+        <h3>${tituloFamilia} ${statusVoucher} ${statusKit}</h3>
         <p><strong>👥 Membros:</strong> ${totalMembros} pessoa(s)</p>
         <p><strong>Código Familiar:</strong> ${familia.cod_familiar}</p>
         <p><strong>Endereço:</strong> ${familia.endereco}${familia.bairro ? ' - ' + familia.bairro : ''}</p>
