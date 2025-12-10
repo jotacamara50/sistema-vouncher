@@ -64,7 +64,7 @@ services:
       - "3000"
 
     volumes:
-      - sqlite-data:/app/backend/database.sqlite
+      - sqlite-data:/app/backend
       - pdfs-data:/app/backend/pdfs
 
     networks:
