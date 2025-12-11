@@ -97,6 +97,7 @@ async function buscarRelatorio() {
     loading.classList.add('hidden');
 
     if (response.ok) {
+      entregasAtuais = entregas; // Armazenar para exportação
       exibirEntregas(entregas);
     } else {
       mostrarAlerta(entregas.error || 'Erro ao buscar relatório', 'error');
@@ -190,12 +191,84 @@ function formatarDataHora(dataStr) {
   });
 }
 
+// Variável global para armazenar dados das entregas para exportação
+let entregasAtuais = [];
+
 function exportarExcel() {
-  mostrarAlerta('Funcionalidade de exportação Excel será implementada em breve!', 'info');
+  if (entregasAtuais.length === 0) {
+    mostrarAlerta('Nenhum dado disponível para exportar', 'error');
+    return;
+  }
+
+  // Preparar dados para Excel
+  const dadosExcel = entregasAtuais.map(e => ({
+    'Código Familiar': e.cod_familiar,
+    'Membros': e.total_membros || 0,
+    'Endereço': e.endereco + (e.bairro ? ' - ' + e.bairro : ''),
+    'Voucher': e.numero_voucher || '-',
+    'Data Voucher': e.data_entrega_voucher ? formatarDataHora(e.data_entrega_voucher) : '-',
+    'Data Kit': e.data_entrega_kit ? formatarDataHora(e.data_entrega_kit) : '-',
+    'Atendente': e.usuario_nome || '-',
+    'CRAS': e.usuario_unidade || '-'
+  }));
+
+  // Criar workbook
+  const ws = XLSX.utils.json_to_sheet(dadosExcel);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Entregas');
+
+  // Gerar arquivo
+  const dataAtual = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+  XLSX.writeFile(wb, `relatorio_entregas_${dataAtual}.xlsx`);
+  
+  mostrarAlerta('Relatório Excel exportado com sucesso!', 'success');
 }
 
 function exportarPDF() {
-  mostrarAlerta('Funcionalidade de exportação PDF será implementada em breve!', 'info');
+  if (entregasAtuais.length === 0) {
+    mostrarAlerta('Nenhum dado disponível para exportar', 'error');
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('l', 'mm', 'a4'); // landscape
+
+  // Título
+  doc.setFontSize(16);
+  doc.text('Relatório de Entregas - Sistema de Vouchers', 14, 15);
+  
+  // Informações do relatório
+  doc.setFontSize(10);
+  const dataAtual = new Date().toLocaleString('pt-BR');
+  doc.text(`Gerado em: ${dataAtual}`, 14, 22);
+  doc.text(`Total de registros: ${entregasAtuais.length}`, 14, 27);
+
+  // Preparar dados para tabela
+  const dadosTabela = entregasAtuais.map(e => [
+    e.cod_familiar,
+    e.total_membros || 0,
+    (e.endereco + (e.bairro ? ' - ' + e.bairro : '')).substring(0, 40),
+    e.numero_voucher || '-',
+    e.data_entrega_voucher ? formatarDataHora(e.data_entrega_voucher) : '-',
+    e.data_entrega_kit ? formatarDataHora(e.data_entrega_kit) : '-',
+    e.usuario_nome || '-'
+  ]);
+
+  // Adicionar tabela
+  doc.autoTable({
+    head: [['Cód. Familiar', 'Membros', 'Endereço', 'Voucher', 'Data Voucher', 'Data Kit', 'Atendente']],
+    body: dadosTabela,
+    startY: 32,
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [102, 126, 234] },
+    margin: { left: 14, right: 14 }
+  });
+
+  // Salvar PDF
+  const dataArquivo = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+  doc.save(`relatorio_entregas_${dataArquivo}.pdf`);
+  
+  mostrarAlerta('Relatório PDF exportado com sucesso!', 'success');
 }
 
 function voltarBusca() {
