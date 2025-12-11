@@ -66,8 +66,8 @@ router.post('/criar-admin', async (req, res) => {
 
   const tipoUsuario = tipo || 'atendente';
 
-  if (!['atendente', 'fiscal'].includes(tipoUsuario)) {
-    return res.status(400).json({ error: 'Tipo deve ser "atendente" ou "fiscal"' });
+  if (!['atendente', 'fiscal', 'master'].includes(tipoUsuario)) {
+    return res.status(400).json({ error: 'Tipo deve ser "atendente", "fiscal" ou "master"' });
   }
 
   const senhaHash = await bcrypt.hash(senha, 10);
