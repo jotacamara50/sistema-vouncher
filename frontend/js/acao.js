@@ -244,8 +244,8 @@ async function vincularVoucher() {
     const data = await response.json();
 
     if (response.ok) {
-      mostrarAlerta('Voucher vinculado com sucesso!', 'success');
-      setTimeout(() => carregarFamilia(), 1500);
+      // Mostrar modal de sucesso que redireciona para busca
+      mostrarModalSucesso('Voucher vinculado com sucesso!', 'O voucher foi registrado. Para entregar o kit, busque a família novamente.');
     } else {
       mostrarAlerta(data.error || 'Erro ao vincular voucher', 'error');
     }
@@ -335,4 +335,54 @@ function mostrarAlerta(mensagem, tipo = 'info') {
   setTimeout(() => {
     alertContainer.innerHTML = '';
   }, 5000);
+}
+
+function mostrarModalSucesso(titulo, mensagem) {
+  // Criar overlay escuro
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  `;
+  
+  // Criar modal
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  `;
+  
+  modal.innerHTML = `
+    <div style="font-size: 48px; margin-bottom: 20px;">✅</div>
+    <h2 style="color: #2ecc71; margin-bottom: 15px;">${titulo}</h2>
+    <p style="color: #555; margin-bottom: 25px;">${mensagem}</p>
+    <button 
+      onclick="window.location.href='busca.html'" 
+      style="
+        background: #2ecc71;
+        color: white;
+        border: none;
+        padding: 12px 40px;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        font-weight: bold;
+      "
+    >OK</button>
+  `;
+  
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
 }
