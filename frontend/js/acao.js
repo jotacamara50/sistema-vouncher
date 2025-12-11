@@ -247,7 +247,7 @@ async function vincularVoucher() {
       // Mostrar modal de sucesso que redireciona para busca
       mostrarModalSucesso(
         'Voucher Vinculado à Família com Sucesso!', 
-        'Atenção: O Registro da entrega do Kit Natalino no sistema, só será efetivado com apresentação do Voucher Físico no ato da entrega dia 19/12/2025 nos pontos de entrega.'
+        `<strong>Voucher Nº ${numero_voucher}</strong><br><br>Atenção: O Registro da entrega do Kit Natalino no sistema, só será efetivado com apresentação do Voucher Físico no ato da entrega dia 19/12/2025 nos pontos de entrega.`
       );
     } else {
       mostrarAlerta(data.error || 'Erro ao vincular voucher', 'error');
