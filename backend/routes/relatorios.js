@@ -9,8 +9,9 @@ router.use(fiscalMiddleware);
 
 // Relatório de entregas por unidade
 router.get('/entregas', (req, res) => {
-  const { data_inicio, data_fim, usuario_id } = req.query;
-  const unidade = req.userUnidade; // Pega unidade do fiscal logado
+  const { data_inicio, data_fim, usuario_id, unidade } = req.query;
+  const userUnidade = req.userUnidade;
+  const userTipo = req.userTipo;
 
   let sql = `
     SELECT 
@@ -27,10 +28,19 @@ router.get('/entregas', (req, res) => {
       (SELECT COUNT(*) FROM membros WHERE cod_familiar = f.cod_familiar) as total_membros
     FROM familias f
     LEFT JOIN usuarios u ON f.usuario_entregou_id = u.id
-    WHERE u.unidade = ?
+    WHERE 1=1
   `;
 
-  const params = [unidade];
+  const params = [];
+
+  // Master pode filtrar por qualquer unidade, fiscal só vê sua unidade
+  if (userTipo !== 'master') {
+    sql += ` AND u.unidade = ?`;
+    params.push(userUnidade);
+  } else if (unidade) {
+    sql += ` AND u.unidade = ?`;
+    params.push(unidade);
+  }
 
   // Filtro por data
   if (data_inicio) {
@@ -62,16 +72,25 @@ router.get('/entregas', (req, res) => {
 
 // Estatísticas da unidade
 router.get('/estatisticas', (req, res) => {
-  const unidade = req.userUnidade;
+  const { unidade } = req.query;
+  const userUnidade = req.userUnidade;
+  const userTipo = req.userTipo;
+  
+  // Master pode ver qualquer unidade, fiscal só a sua
+  const unidadeFiltro = (userTipo === 'master' && unidade) ? unidade : userUnidade;
   const stats = {};
+
+  // Condição SQL para filtro de unidade
+  const whereSql = unidadeFiltro ? 'WHERE u.unidade = ?' : 'WHERE 1=1';
+  const whereParams = unidadeFiltro ? [unidadeFiltro] : [];
 
   // Total de famílias atendidas pela unidade
   db.get(
     `SELECT COUNT(DISTINCT f.id) as total
      FROM familias f
      INNER JOIN usuarios u ON f.usuario_entregou_id = u.id
-     WHERE u.unidade = ?`,
-    [unidade],
+     ${whereSql}`,
+    whereParams,
     (err, row) => {
       if (err) {
         return res.status(500).json({ error: 'Erro ao buscar estatísticas' });
@@ -83,8 +102,8 @@ router.get('/estatisticas', (req, res) => {
         `SELECT COUNT(*) as total
          FROM familias f
          INNER JOIN usuarios u ON f.usuario_entregou_id = u.id
-         WHERE u.unidade = ? AND f.numero_voucher IS NOT NULL`,
-        [unidade],
+         ${whereSql} ${unidadeFiltro ? 'AND' : 'WHERE'} f.numero_voucher IS NOT NULL`,
+        whereParams,
         (err, row) => {
           stats.vouchers_entregues = row.total || 0;
 
@@ -93,8 +112,8 @@ router.get('/estatisticas', (req, res) => {
             `SELECT COUNT(*) as total
              FROM familias f
              INNER JOIN usuarios u ON f.usuario_entregou_id = u.id
-             WHERE u.unidade = ? AND f.data_entrega_kit IS NOT NULL`,
-            [unidade],
+             ${whereSql} ${unidadeFiltro ? 'AND' : 'WHERE'} f.data_entrega_kit IS NOT NULL`,
+            whereParams,
             (err, row) => {
               stats.kits_entregues = row.total || 0;
 
@@ -104,8 +123,8 @@ router.get('/estatisticas', (req, res) => {
                  FROM membros m
                  INNER JOIN familias f ON m.cod_familiar = f.cod_familiar
                  INNER JOIN usuarios u ON f.usuario_entregou_id = u.id
-                 WHERE u.unidade = ?`,
-                [unidade],
+                 ${whereSql}`,
+                whereParams,
                 (err, row) => {
                   stats.total_pessoas_atendidas = row.total || 0;
 
@@ -118,10 +137,10 @@ router.get('/estatisticas', (req, res) => {
                        SUM(CASE WHEN f.data_entrega_kit IS NOT NULL THEN 1 ELSE 0 END) as kits
                      FROM usuarios u
                      LEFT JOIN familias f ON u.id = f.usuario_entregou_id
-                     WHERE u.unidade = ?
+                     ${unidadeFiltro ? 'WHERE u.unidade = ?' : 'WHERE 1=1'}
                      GROUP BY u.id, u.nome
                      ORDER BY familias_atendidas DESC`,
-                    [unidade],
+                    unidadeFiltro ? [unidadeFiltro] : [],
                     (err, rows) => {
                       stats.por_atendente = rows || [];
                       res.json(stats);

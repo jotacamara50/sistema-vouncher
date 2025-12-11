@@ -21,9 +21,9 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-// Middleware para permitir apenas fiscais
+// Middleware para permitir fiscais e masters
 const fiscalMiddleware = (req, res, next) => {
-  if (req.userTipo !== 'fiscal') {
+  if (req.userTipo !== 'fiscal' && req.userTipo !== 'master') {
     return res.status(403).json({ error: 'Acesso negado. Apenas fiscais podem acessar relatórios.' });
   }
   next();
