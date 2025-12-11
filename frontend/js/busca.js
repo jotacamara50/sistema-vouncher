@@ -14,8 +14,8 @@ const usuario = JSON.parse(usuarioStr);
 // Exibir nome do usuário
 document.getElementById('userName').textContent = usuario.nome || 'Usuário';
 
-// Mostrar botão de relatórios se for fiscal
-if (usuario.tipo === 'fiscal') {
+// Mostrar botão de relatórios se for fiscal ou master
+if (usuario.tipo === 'fiscal' || usuario.tipo === 'master') {
   const btnRelatorios = document.getElementById('btnRelatorios');
   if (btnRelatorios) {
     btnRelatorios.style.display = 'inline-block';
