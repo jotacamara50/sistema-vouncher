@@ -11,7 +11,7 @@ if (!token || !usuarioStr) {
 
 const usuario = JSON.parse(usuarioStr);
 
-if (usuario.tipo !== 'fiscal') {
+if (usuario.tipo !== 'fiscal' && usuario.tipo !== 'master') {
   alert('Acesso negado. Apenas fiscais podem acessar relatórios.');
   window.location.href = 'busca.html';
   throw new Error('Acesso negado');
