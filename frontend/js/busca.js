@@ -107,10 +107,15 @@ function exibirResultados(familias) {
 
     const totalMembros = familia.total_membros || 0;
     
-    // Se encontrou o nome do membro buscado, usar ele no título
-    const tituloFamilia = familia.nome_membro_buscado 
-      ? `${familia.nome_membro_buscado}` 
-      : `Família ${familia.cod_familiar}`;
+    // Determinar o título a exibir
+    let tituloFamilia;
+    if (familia.nome_membro_buscado) {
+      // Se encontrou o nome do membro buscado, usar ele
+      tituloFamilia = familia.nome_membro_buscado;
+    } else {
+      // Caso contrário, usar código familiar
+      tituloFamilia = `Família ${familia.cod_familiar}`;
+    }
 
     // Adicionar classe de inabilitado se renda estiver acima
     const classeInabilitado = rendaAcima ? ' result-item-inabilitado' : '';
