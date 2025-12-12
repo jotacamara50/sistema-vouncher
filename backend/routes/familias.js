@@ -93,11 +93,15 @@ router.get('/:id', (req, res) => {
 // Vincular voucher à família
 router.post('/:id/vincular-voucher', (req, res) => {
   const { id } = req.params;
-  const { numero_voucher } = req.body;
+  const { numero_voucher, membro_retirou_id } = req.body;
   const usuario_id = req.userId;
 
   if (!numero_voucher) {
     return res.status(400).json({ error: 'Número do voucher obrigatório' });
+  }
+
+  if (!membro_retirou_id) {
+    return res.status(400).json({ error: 'É obrigatório selecionar quem está retirando o voucher' });
   }
 
   // Verificar se o número do voucher já foi usado
@@ -143,9 +147,10 @@ router.post('/:id/vincular-voucher', (req, res) => {
           `UPDATE familias 
            SET numero_voucher = ?, 
                data_entrega_voucher = datetime('now', 'localtime'),
-               usuario_entregou_id = ?
+               usuario_entregou_id = ?,
+               membro_retirou_id = ?
            WHERE id = ?`,
-          [numero_voucher, usuario_id, id],
+          [numero_voucher, usuario_id, membro_retirou_id, id],
           function(err) {
             if (err) {
               return res.status(500).json({ error: 'Erro ao vincular voucher' });

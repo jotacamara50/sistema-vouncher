@@ -131,7 +131,20 @@ function exibirFamilia(familia) {
       html += `
         <div class="voucher-input">
           <h3>📋 Vincular Voucher</h3>
-          <p class="mb-20">Digite o número do voucher físico</p>
+          <p class="mb-20">Digite o número do voucher físico e selecione quem está retirando</p>
+          
+          <label for="membroRetirou"><strong>Quem está retirando o voucher?</strong></label>
+          <select id="membroRetirou" class="form-select" required>
+            <option value="">Selecione o membro da família</option>
+            ${familia.membros && familia.membros.length > 0 ? 
+              familia.membros.map(membro => `
+                <option value="${membro.id}">${membro.nome} - CPF: ${formatarCPF(membro.cpf)}</option>
+              `).join('') 
+              : '<option value="">Nenhum membro cadastrado</option>'
+            }
+          </select>
+          
+          <label for="numeroVoucher" class="mt-20"><strong>Número do Voucher</strong></label>
           <input 
             type="number" 
             id="numeroVoucher" 
@@ -225,9 +238,15 @@ function exibirFamilia(familia) {
 
 async function vincularVoucher() {
   const numero_voucher = document.getElementById('numeroVoucher').value;
+  const membro_retirou_id = document.getElementById('membroRetirou').value;
 
   if (!numero_voucher) {
     mostrarAlerta('Digite o número do voucher', 'error');
+    return;
+  }
+
+  if (!membro_retirou_id) {
+    mostrarAlerta('Selecione quem está retirando o voucher', 'error');
     return;
   }
 
@@ -238,7 +257,10 @@ async function vincularVoucher() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ numero_voucher: parseInt(numero_voucher) })
+      body: JSON.stringify({ 
+        numero_voucher: parseInt(numero_voucher),
+        membro_retirou_id: parseInt(membro_retirou_id)
+      })
     });
 
     const data = await response.json();

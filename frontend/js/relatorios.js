@@ -157,6 +157,7 @@ function exibirEntregas(entregas) {
           <th>Membros</th>
           <th>Endereço</th>
           <th>Voucher</th>
+          <th>Quem Retirou</th>
           <th>Data Voucher</th>
           <th>Data Kit</th>
           <th>Atendente</th>
@@ -169,6 +170,7 @@ function exibirEntregas(entregas) {
             <td>${e.total_membros || 0}</td>
             <td>${e.endereco}${e.bairro ? ' - ' + e.bairro : ''}</td>
             <td>${e.numero_voucher || '-'}</td>
+            <td>${e.membro_retirou_nome ? e.membro_retirou_nome : '-'}</td>
             <td>${e.data_entrega_voucher ? formatarDataHora(e.data_entrega_voucher) : '-'}</td>
             <td>${e.data_entrega_kit ? formatarDataHora(e.data_entrega_kit) : '-'}</td>
             <td>${e.usuario_nome || '-'}</td>
@@ -206,6 +208,7 @@ function exportarExcel() {
     'Membros': e.total_membros || 0,
     'Endereço': e.endereco + (e.bairro ? ' - ' + e.bairro : ''),
     'Voucher': e.numero_voucher || '-',
+    'Quem Retirou': e.membro_retirou_nome || '-',
     'Data Voucher': e.data_entrega_voucher ? formatarDataHora(e.data_entrega_voucher) : '-',
     'Data Kit': e.data_entrega_kit ? formatarDataHora(e.data_entrega_kit) : '-',
     'Atendente': e.usuario_nome || '-',
@@ -247,21 +250,22 @@ function exportarPDF() {
   const dadosTabela = entregasAtuais.map(e => [
     e.cod_familiar,
     e.total_membros || 0,
-    (e.endereco + (e.bairro ? ' - ' + e.bairro : '')).substring(0, 40),
+    (e.endereco + (e.bairro ? ' - ' + e.bairro : '')).substring(0, 30),
     e.numero_voucher || '-',
+    e.membro_retirou_nome ? e.membro_retirou_nome.substring(0, 20) : '-',
     e.data_entrega_voucher ? formatarDataHora(e.data_entrega_voucher) : '-',
     e.data_entrega_kit ? formatarDataHora(e.data_entrega_kit) : '-',
-    e.usuario_nome || '-'
+    (e.usuario_nome || '-').substring(0, 15)
   ]);
 
   // Adicionar tabela
   doc.autoTable({
-    head: [['Cód. Familiar', 'Membros', 'Endereço', 'Voucher', 'Data Voucher', 'Data Kit', 'Atendente']],
+    head: [['Cód.', 'Membros', 'Endereço', 'Voucher', 'Quem Retirou', 'Data Voucher', 'Data Kit', 'Atendente']],
     body: dadosTabela,
     startY: 32,
-    styles: { fontSize: 8 },
+    styles: { fontSize: 7 },
     headStyles: { fillColor: [102, 126, 234] },
-    margin: { left: 14, right: 14 }
+    margin: { left: 10, right: 10 }
   });
 
   // Salvar PDF

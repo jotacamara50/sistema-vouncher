@@ -25,9 +25,12 @@ router.get('/entregas', (req, res) => {
       f.data_entrega_kit,
       u.nome as usuario_nome,
       u.unidade as usuario_unidade,
+      m.nome as membro_retirou_nome,
+      m.cpf as membro_retirou_cpf,
       (SELECT COUNT(*) FROM membros WHERE cod_familiar = f.cod_familiar) as total_membros
     FROM familias f
     LEFT JOIN usuarios u ON f.usuario_entregou_id = u.id
+    LEFT JOIN membros m ON f.membro_retirou_id = m.id
     WHERE 1=1
   `;
 

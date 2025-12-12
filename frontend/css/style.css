@@ -82,7 +82,8 @@ body {
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+select.form-select {
   width: 100%;
   padding: 12px 15px;
   border: 2px solid #e0e0e0;
@@ -92,7 +93,8 @@ body {
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+select.form-select:focus {
   outline: none;
   border-color: #667eea;
 }
