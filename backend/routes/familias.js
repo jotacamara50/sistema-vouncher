@@ -25,7 +25,11 @@ router.get('/buscar', (req, res) => {
            (SELECT m2.nome FROM membros m2 
             WHERE m2.cod_familiar = f.cod_familiar 
             AND (m2.cpf = ? OR m2.nis = ? OR m2.nome LIKE ?)
-            LIMIT 1) as nome_membro_buscado
+            LIMIT 1) as nome_membro_buscado,
+           (SELECT m2.id FROM membros m2 
+            WHERE m2.cod_familiar = f.cod_familiar 
+            AND (m2.cpf = ? OR m2.nis = ? OR m2.nome LIKE ?)
+            LIMIT 1) as membro_buscado_id
     FROM familias f
     WHERE f.cod_familiar IN (
       SELECT DISTINCT m.cod_familiar 
@@ -41,7 +45,7 @@ router.get('/buscar', (req, res) => {
 
   db.all(
     sql,
-    [termoLimpo, termoLimpo, `%${termo}%`, termoLimpo, termoLimpo, `%${termo}%`, `%${termo}%`],
+    [termoLimpo, termoLimpo, `%${termo}%`, termoLimpo, termoLimpo, `%${termo}%`, termoLimpo, termoLimpo, `%${termo}%`, `%${termo}%`],
     (err, rows) => {
       if (err) {
         console.error('Erro ao buscar famílias:', err);

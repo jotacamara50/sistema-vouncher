@@ -17,6 +17,8 @@ document.getElementById('userName').textContent = usuario.nome || 'Usuário';
 // Obter ID da família da URL
 const urlParams = new URLSearchParams(window.location.search);
 const familiaId = urlParams.get('id');
+const membroIdBuscado = urlParams.get('membro_id');
+const membroNomeBuscado = urlParams.get('membro_nome') ? decodeURIComponent(urlParams.get('membro_nome')) : null;
 
 if (!familiaId) {
   window.location.href = 'busca.html';
@@ -131,20 +133,15 @@ function exibirFamilia(familia) {
       html += `
         <div class="voucher-input">
           <h3>📋 Vincular Voucher</h3>
-          <p class="mb-20">Digite o número do voucher físico e selecione quem está retirando</p>
+          ${membroNomeBuscado ? `
+            <div class="alert alert-info mb-20">
+              <strong>👤 Quem está retirando:</strong> ${membroNomeBuscado}
+            </div>
+          ` : `
+            <p class="mb-20">Digite o número do voucher físico</p>
+          `}
           
-          <label for="membroRetirou"><strong>Quem está retirando o voucher?</strong></label>
-          <select id="membroRetirou" class="form-select" required>
-            <option value="">Selecione o membro da família</option>
-            ${familia.membros && familia.membros.length > 0 ? 
-              familia.membros.map(membro => `
-                <option value="${membro.id}">${membro.nome} - CPF: ${formatarCPF(membro.cpf)}</option>
-              `).join('') 
-              : '<option value="">Nenhum membro cadastrado</option>'
-            }
-          </select>
-          
-          <label for="numeroVoucher" class="mt-20"><strong>Número do Voucher</strong></label>
+          <label for="numeroVoucher"><strong>Número do Voucher</strong></label>
           <input 
             type="number" 
             id="numeroVoucher" 
@@ -238,7 +235,7 @@ function exibirFamilia(familia) {
 
 async function vincularVoucher() {
   const numero_voucher = document.getElementById('numeroVoucher').value;
-  const membro_retirou_id = document.getElementById('membroRetirou').value;
+  const membro_retirou_id = membroIdBuscado; // Usar o ID capturado da URL
 
   if (!numero_voucher) {
     mostrarAlerta('Digite o número do voucher', 'error');
@@ -246,7 +243,7 @@ async function vincularVoucher() {
   }
 
   if (!membro_retirou_id) {
-    mostrarAlerta('Selecione quem está retirando o voucher', 'error');
+    mostrarAlerta('Não foi possível identificar quem está retirando. Volte e busque novamente pelo CPF/NIS do membro.', 'error');
     return;
   }
 
@@ -257,7 +254,7 @@ async function vincularVoucher() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         numero_voucher: parseInt(numero_voucher),
         membro_retirou_id: parseInt(membro_retirou_id)
       })

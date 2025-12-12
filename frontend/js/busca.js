@@ -120,8 +120,12 @@ function exibirResultados(familias) {
     // Adicionar classe de inabilitado se renda estiver acima
     const classeInabilitado = rendaAcima ? ' result-item-inabilitado' : '';
 
+    // Passar o ID do membro buscado (se houver) e seu nome
+    const membroId = familia.membro_buscado_id || '';
+    const membroNome = familia.nome_membro_buscado ? encodeURIComponent(familia.nome_membro_buscado) : '';
+
     return `
-      <div class="result-item${classeInabilitado}" onclick="abrirFamilia(${familia.id})">
+      <div class="result-item${classeInabilitado}" onclick="abrirFamilia(${familia.id}, ${membroId ? membroId : 'null'}, '${membroNome}')">
         <h3>${tituloFamilia} ${statusVoucher} ${statusKit}</h3>
         <p><strong>👥 Membros:</strong> ${totalMembros} pessoa(s)</p>
         <p><strong>Código Familiar:</strong> ${familia.cod_familiar}</p>
@@ -133,8 +137,12 @@ function exibirResultados(familias) {
   }).join('');
 }
 
-function abrirFamilia(id) {
-  window.location.href = `acao.html?id=${id}`;
+function abrirFamilia(id, membroId, membroNome) {
+  let url = `acao.html?id=${id}`;
+  if (membroId) {
+    url += `&membro_id=${membroId}&membro_nome=${membroNome}`;
+  }
+  window.location.href = url;
 }
 
 function formatarCPF(cpf) {
