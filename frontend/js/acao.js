@@ -182,17 +182,7 @@ function exibirFamilia(familia) {
       </div>
       <div class="voucher-input mt-20">
         <h3>🎁 Entregar Kit de Alimentação</h3>
-        <p class="mb-20">Digite o número do voucher que o beneficiário apresentou</p>
-        <input 
-          type="number" 
-          id="validarVoucher" 
-          placeholder="0000"
-          maxlength="6"
-          autofocus
-        >
-        <button class="btn btn-success mt-20" onclick="entregarKit()">
-          Confirmar Entrega do Kit
-        </button>
+        ${verificarDataEntregaKit()}
       </div>
     `;
   }
@@ -315,6 +305,47 @@ async function entregarKit() {
     mostrarAlerta('Erro ao conectar com o servidor', 'error');
     console.error(error);
   }
+}
+
+function verificarDataEntregaKit() {
+  const hoje = new Date();
+  const dataLiberacao = new Date('2025-12-19T00:00:00');
+  
+  if (hoje < dataLiberacao) {
+    const diasRestantes = Math.ceil((dataLiberacao - hoje) / (1000 * 60 * 60 * 24));
+    return `
+      <div class="alert alert-warning mb-20">
+        <strong>⏳ Entrega bloqueada até 19/12/2025</strong><br>
+        <p>A entrega dos kits de alimentação estará disponível a partir do dia 19/12/2025.</p>
+        <p>Faltam <strong>${diasRestantes} dia(s)</strong> para liberação.</p>
+      </div>
+      <input 
+        type="number" 
+        id="validarVoucher" 
+        placeholder="0000"
+        maxlength="6"
+        disabled
+        style="opacity: 0.5;"
+      >
+      <button class="btn btn-disabled mt-20" disabled>
+        🔒 Entrega Bloqueada até 19/12
+      </button>
+    `;
+  }
+  
+  return `
+    <p class="mb-20">Digite o número do voucher que o beneficiário apresentou</p>
+    <input 
+      type="number" 
+      id="validarVoucher" 
+      placeholder="0000"
+      maxlength="6"
+      autofocus
+    >
+    <button class="btn btn-success mt-20" onclick="entregarKit()">
+      Confirmar Entrega do Kit
+    </button>
+  `;
 }
 
 function formatarCPF(cpf) {

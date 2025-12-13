@@ -181,7 +181,15 @@ router.post('/:id/entregar-kit', (req, res) => {
   if (!numero_voucher) {
     return res.status(400).json({ error: 'Número do voucher obrigatório para validação' });
   }
-
+  // Validar data - só permitir entrega a partir de 19/12/2025
+  const hoje = new Date();
+  const dataLiberacao = new Date('2025-12-19T00:00:00');
+  
+  if (hoje < dataLiberacao) {
+    return res.status(403).json({ 
+      error: 'A entrega de kits estará disponível a partir de 19/12/2025' 
+    });
+  }
   db.get('SELECT * FROM familias WHERE id = ?', [id], (err, familia) => {
     if (err) {
       return res.status(500).json({ error: 'Erro ao buscar família' });
