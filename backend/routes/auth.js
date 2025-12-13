@@ -72,16 +72,38 @@ router.post('/criar-admin', async (req, res) => {
 
   const senhaHash = await bcrypt.hash(senha, 10);
 
-  db.run(
-    'INSERT INTO usuarios (nome, login, senha, unidade, tipo) VALUES (?, ?, ?, ?, ?)',
-    [nome, login, senhaHash, unidade, tipoUsuario],
-    function(err) {
-      if (err) {
-        return res.status(500).json({ error: 'Erro ao criar usuário' });
-      }
-      res.json({ message: 'Usuário criado com sucesso', id: this.lastID });
+  // Verificar se o login já existe
+  db.get('SELECT id FROM usuarios WHERE login = ?', [login], (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: 'Erro ao verificar usuário' });
     }
-  );
+
+    if (row) {
+      // Usuário existe - fazer UPDATE
+      db.run(
+        'UPDATE usuarios SET nome = ?, senha = ?, unidade = ?, tipo = ? WHERE login = ?',
+        [nome, senhaHash, unidade, tipoUsuario, login],
+        function(err) {
+          if (err) {
+            return res.status(500).json({ error: 'Erro ao atualizar usuário' });
+          }
+          res.json({ message: 'Usuário atualizado com sucesso', id: row.id });
+        }
+      );
+    } else {
+      // Usuário não existe - fazer INSERT
+      db.run(
+        'INSERT INTO usuarios (nome, login, senha, unidade, tipo) VALUES (?, ?, ?, ?, ?)',
+        [nome, login, senhaHash, unidade, tipoUsuario],
+        function(err) {
+          if (err) {
+            return res.status(500).json({ error: 'Erro ao criar usuário' });
+          }
+          res.json({ message: 'Usuário criado com sucesso', id: this.lastID });
+        }
+      );
+    }
+  });
 });
 
 module.exports = router;
