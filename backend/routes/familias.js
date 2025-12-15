@@ -132,14 +132,17 @@ router.post('/:id/vincular-voucher', (req, res) => {
         }
 
         // Vincular voucher
+        const dataHoraBrasilia = new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' });
+        const dataFormatada = new Date(dataHoraBrasilia).toISOString().slice(0, 19).replace('T', ' ');
+        
         db.run(
           `UPDATE familias 
            SET numero_voucher = ?, 
-               data_entrega_voucher = datetime('now', 'localtime'),
+               data_entrega_voucher = ?,
                usuario_entregou_id = ?,
                membro_retirou_id = ?
            WHERE id = ?`,
-          [numero_voucher, usuario_id, membro_retirou_id, id],
+          [numero_voucher, dataFormatada, usuario_id, membro_retirou_id, id],
           function(err) {
             if (err) {
               return res.status(500).json({ error: 'Erro ao vincular voucher' });
@@ -202,12 +205,15 @@ router.post('/:id/entregar-kit', (req, res) => {
     }
 
     // Registrar entrega do kit
+    const dataHoraBrasilia = new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' });
+    const dataFormatada = new Date(dataHoraBrasilia).toISOString().slice(0, 19).replace('T', ' ');
+    
     db.run(
       `UPDATE familias 
-       SET data_entrega_kit = datetime('now', 'localtime'),
+       SET data_entrega_kit = ?,
            usuario_entregou_id = ?
        WHERE id = ?`,
-      [usuario_id, id],
+      [dataFormatada, usuario_id, id],
       function(err) {
         if (err) {
           return res.status(500).json({ error: 'Erro ao registrar entrega do kit' });
