@@ -108,23 +108,8 @@ router.post('/:id/vincular-voucher', (req, res) => {
     return res.status(400).json({ error: 'É obrigatório selecionar quem está retirando o voucher' });
   }
 
-  // Verificar se o número do voucher já foi usado
-  db.get(
-    'SELECT * FROM familias WHERE numero_voucher = ?',
-    [numero_voucher],
-    (err, voucherExistente) => {
-      if (err) {
-        return res.status(500).json({ error: 'Erro ao verificar voucher' });
-      }
-
-      if (voucherExistente) {
-        return res.status(400).json({ 
-          error: 'Este número de voucher já foi usado por outra família' 
-        });
-      }
-
-      // Verificar se a família já tem voucher e validar renda
-      db.get('SELECT * FROM familias WHERE id = ?', [id], (err, familia) => {
+  // Verificar se a família já tem voucher e validar renda
+  db.get('SELECT * FROM familias WHERE id = ?', [id], (err, familia) => {
         if (err) {
           return res.status(500).json({ error: 'Erro ao buscar família' });
         }
@@ -168,8 +153,6 @@ router.post('/:id/vincular-voucher', (req, res) => {
           }
         );
       });
-    }
-  );
 });
 
 // Entregar kit de alimentação
