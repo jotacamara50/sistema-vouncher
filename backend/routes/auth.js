@@ -31,6 +31,19 @@ router.post('/login', (req, res) => {
         return res.status(401).json({ error: 'Usuário ou senha inválidos' });
       }
 
+      // Bloquear atendentes e fiscais até 19/12/2025
+      if (usuario.tipo === 'atendente' || usuario.tipo === 'fiscal') {
+        const dataLiberacao = new Date('2025-12-19T00:00:00-03:00');
+        const agora = new Date();
+        
+        if (agora < dataLiberacao) {
+          const diasRestantes = Math.ceil((dataLiberacao - agora) / (1000 * 60 * 60 * 24));
+          return res.status(403).json({ 
+            error: `Sistema bloqueado até 19 de dezembro de 2025. Faltam ${diasRestantes} dia(s).` 
+          });
+        }
+      }
+
       const token = jwt.sign(
         { 
           id: usuario.id, 
